@@ -12,7 +12,7 @@ export interface AgentFramework {
   logo_url: string;
 }
 
-export async function parseAgentFrameworks(): Promise<AgentFramework[]> {
+export async function parseAgentFrameworksFromCSV(): Promise<AgentFramework[]> {
   const response = await fetch('/agent_frameworks.csv');
   const csvText = await response.text();
   
@@ -23,4 +23,10 @@ export async function parseAgentFrameworks(): Promise<AgentFramework[]> {
   });
   
   return data;
+}
+
+export async function parseAgentFrameworks(): Promise<AgentFramework[]> {
+  const response = await fetch('/agent_frameworks.json');
+  const data = await response.json();
+  return data as AgentFramework[];
 }

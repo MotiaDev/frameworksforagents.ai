@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import ScatterPlot from '@/components/ScatterPlot';
-import { AgentFramework, parseAgentFrameworks } from '@/lib/csv-parser';
+import { AgentFramework, parseAgentFrameworks } from '@/lib/data-parser';
 
 export default function Home() {
   const [frameworks, setFrameworks] = useState<AgentFramework[]>([]);
@@ -14,6 +14,7 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
+        // This now loads from agent_frameworks.json instead of CSV
         const data = await parseAgentFrameworks();
         setFrameworks(data);
         setFilteredFrameworks(data);
@@ -21,7 +22,7 @@ export default function Home() {
       } catch (err) {
         setError('Failed to load data');
         setLoading(false);
-        console.error('Error loading CSV data:', err);
+        console.error('Error loading framework data:', err);
       }
     }
 

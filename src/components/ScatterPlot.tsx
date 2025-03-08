@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { AgentFramework } from '@/lib/csv-parser';
+import { AgentFramework } from '@/lib/data-parser';
 import FrameworkDetails from './FrameworkDetails';
 import dynamic from 'next/dynamic';
 

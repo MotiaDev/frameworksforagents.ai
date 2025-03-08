@@ -1,6 +1,6 @@
 'use client';
 
-import { AgentFramework } from '@/lib/csv-parser';
+import { AgentFramework } from '@/lib/data-parser';
 import { 
   Dialog,
   DialogContent,
