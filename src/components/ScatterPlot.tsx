@@ -50,7 +50,7 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
         const point = meta.data[index];
         
         if (point && point.x !== undefined && point.y !== undefined) {
-          const size = 28; // Size of logo circle
+          const size = 32; // Keep this consistent with hit detection radius (16px radius = 32px diameter)
           const x = point.x - size / 2;
           const y = point.y - size / 2;
           
@@ -60,19 +60,37 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
           ctx.fillStyle = '#ffffff';
           ctx.fill();
           
-          // Draw colored border with subtle glow
+          // Generate a consistent color for this framework
+          const nameHash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          const colors = [
+            '#4285F4', '#EA4335', '#FBBC05', '#34A853', // Google colors
+            '#007BFF', '#6610F2', '#6F42C1', '#E83E8C', // Bootstrap colors
+            '#FF5722', '#009688', '#673AB7', '#3F51B5'  // Material colors
+          ];
+          const colorIndex = nameHash % colors.length;
+          const borderColor = colors[colorIndex];
+          
+          // Draw colored border with subtle glow - unique color per framework
           ctx.beginPath();
           ctx.arc(point.x, point.y, size / 2, 0, 2 * Math.PI);
           ctx.lineWidth = 2;
-          ctx.strokeStyle = isDarkMode ? 'rgba(150, 150, 255, 0.8)' : 'rgba(100, 100, 255, 0.8)';
+          ctx.strokeStyle = borderColor;
           ctx.stroke();
           
           // Add subtle outer glow
           ctx.beginPath();
           ctx.arc(point.x, point.y, size / 2 + 2, 0, 2 * Math.PI);
           ctx.lineWidth = 1;
-          ctx.strokeStyle = isDarkMode ? 'rgba(150, 150, 255, 0.3)' : 'rgba(100, 100, 255, 0.3)';
+          ctx.strokeStyle = borderColor.replace(')', ', 0.3)').replace('rgb', 'rgba');
           ctx.stroke();
+          
+          // Draw tiny name label below the icon for better identification
+          if (chart.getZoomLevel && chart.getZoomLevel() > 1.5) {
+            ctx.font = 'bold 8px Arial';
+            ctx.fillStyle = isDarkMode ? '#ffffff' : '#000000';
+            ctx.textAlign = 'center';
+            ctx.fillText(name.length > 12 ? name.substring(0, 10) + '...' : name, point.x, point.y + size/2 + 10);
+          }
           
           // Draw logo or initials
           const logo = logoImages[name];
@@ -86,7 +104,7 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
               ctx.clip();
               
               // Draw image with small margin for better appearance
-              const margin = 4;
+              const margin = 6;
               ctx.drawImage(logo, x + margin/2, y + margin/2, size - margin, size - margin);
               ctx.restore();
             } else {
@@ -116,6 +134,17 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
               ctx.drawImage(initialsSVG, x, y, size, size);
               ctx.restore();
             }
+          }
+          
+          // Add a hovering indicator that appears when point is hovered
+          if (meta.controller.active && meta.controller.active.includes(point)) {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, size / 2 + 5, 0, 2 * Math.PI);
+            ctx.lineWidth = 2;
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = borderColor;
+            ctx.stroke();
+            ctx.setLineDash([]);
           }
         }
       });
@@ -165,15 +194,21 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
     });
     frameworksByName.current = lookupMap;
 
-    // Add a jitter function to slightly move overlapping points
-    const addJitter = (value: number, amount: number = 0.02): number => {
+    // Add a deterministic jitter function to consistently move overlapping points
+    // Using the framework name as a seed for consistent jittering
+    const addDeterministicJitter = (value: number, name: string, amount: number = 0.02): number => {
       // Don't jitter if the value is 0 or 1, to maintain boundary points
       if (value === 0 || value === 1) return value;
-      return value + (Math.random() - 0.5) * amount;
+      
+      // Use the name to create a deterministic "random" value
+      // This ensures the same framework always gets the same jitter amount
+      const nameHash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const pseudoRandom = (nameHash % 100) / 100; // value between 0 and 1
+      return value + (pseudoRandom - 0.5) * amount;
     };
     
     // Create a map to track positions and avoid overlaps
-    const positionMap: Record<string, boolean> = {};
+    const positionMap: Record<string, {frameworks: string[], count: number}> = {};
     
     setChartData({
       datasets: [
@@ -185,13 +220,16 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
             let y = framework.complexity;
             const key = `${x.toFixed(2)},${y.toFixed(2)}`;
             
-            // If this position is already taken, add jitter until we find a free spot
-            if (positionMap[key]) {
-              x = addJitter(x);
-              y = addJitter(y);
-              positionMap[`${x.toFixed(2)},${y.toFixed(2)}`] = true;
+            // Track overlapping frameworks at each position
+            if (!positionMap[key]) {
+              positionMap[key] = {frameworks: [framework.name], count: 1};
             } else {
-              positionMap[key] = true;
+              positionMap[key].frameworks.push(framework.name);
+              positionMap[key].count += 1;
+              
+              // Apply deterministic jitter based on framework name
+              x = addDeterministicJitter(x, framework.name);
+              y = addDeterministicJitter(y, framework.name);
             }
             
             return {
@@ -199,19 +237,19 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
               y,
               name: framework.name,
               description: framework.description,
-              category: framework.category, // Keep category for tooltip but don't filter by it
+              category: framework.category,
               url: framework.url,
               logo_url: framework.logo_url,
-              // Store original values for tooltip
+              // Store original values for tooltip and lookup
               originalX: framework.code_level,
               originalY: framework.complexity
             };
           }),
           backgroundColor: 'transparent', // Using transparent since we're rendering our own circles
-          pointRadius: 18, // Slightly larger to make logos more visible
-          pointHoverRadius: 22,
+          pointRadius: 16, // Match with the hit detection in onClick handler
+          pointHoverRadius: 16, // Keep the same as pointRadius to avoid visual confusion
           pointStyle: 'circle',
-          hitRadius: 30, // Increase hit area for better clickability
+          hitRadius: 1, // Near-zero hit radius to disable Chart.js internal clustering
         }
       ],
     });
@@ -265,6 +303,13 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
   const options: any = {
     responsive: true,
     maintainAspectRatio: false,
+    // Disable all Chart.js interaction modes to prevent clustering behavior
+    interaction: {
+      mode: 'point', // Strict point mode - only interact with exact points
+      intersect: true, // Require direct intersection for hover/click
+      includeInvisible: false, // Ignore invisible points
+      axis: 'xy' // Require both x and y intersection
+    },
     scales: {
       x: {
         type: 'linear',
@@ -374,21 +419,39 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
       easing: 'easeOutQuart'
     },
     onClick: (event: any, elements: any, chart: any) => {
-      console.log("Chart clicked", event, elements);
-      if (elements && elements.length > 0) {
-        const { datasetIndex, index } = elements[0];
+      // Completely bypass Chart.js clustering by using direct position detection
+      if (chart && event?.native) {
+        // Get exact mouse position
+        const rect = chart.canvas.getBoundingClientRect();
+        const mouseX = event.native.clientX - rect.left;
+        const mouseY = event.native.clientY - rect.top;
         
-        if (chart && chart.data && chart.data.datasets) {
-          const dataPoint = chart.data.datasets[datasetIndex].data[index];
-          if (dataPoint && dataPoint.name) {
-            console.log("Point clicked:", dataPoint.name);
-            const framework = frameworksByName.current[dataPoint.name];
+        // Get all points and their exact positions
+        const dataset = chart.data.datasets[0];
+        const meta = chart.getDatasetMeta(0);
+        
+        // Find the EXACT point under cursor, no clustering or nearest-neighbor
+        for (let i = 0; i < meta.data.length; i++) {
+          const point = meta.data[i];
+          const pointX = point.x;
+          const pointY = point.y;
+          
+          // Check if mouse is inside the point's circle (16px radius matches our visual size)
+          const distance = Math.sqrt(Math.pow(mouseX - pointX, 2) + Math.pow(mouseY - pointY, 2));
+          
+          // Only open if mouse is DIRECTLY on this point - using much smaller radius
+          if (distance <= 16) {
+            const dataPoint = dataset.data[i];
+            console.log("EXACT point clicked:", dataPoint.name, "distance:", distance);
             
+            const framework = frameworksByName.current[dataPoint.name];
             if (framework) {
-              console.log("Opening framework dialog:", framework.name);
               setSelectedFramework(framework);
               setDialogOpen(true);
             }
+            
+            // Important: return after finding the direct hit to prevent multiple dialogs
+            return;
           }
         }
       }

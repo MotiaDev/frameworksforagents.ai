@@ -40,8 +40,8 @@
     "complexity": 0.7,
     "complexity_justification": "Orchestrating multiple agents with distinct roles adds significant complexity.",
     "description": "Framework for orchestrating role-based agent teams",
-    "url": "https://www.crewai.io/",
-    "logo_url": "https://crewai.io/logo-dark.svg"
+    "url": "https://www.crewai.com/",
+    "logo_url": "https://mintlify.s3-us-west-1.amazonaws.com/crewai/crew_only_logo.png"
   },
   {
     "name": "SuperAGI",
@@ -283,7 +283,7 @@
     "complexity_justification": "Streamlined interface with guided workflow creation reduces complexity.",
     "description": "Visual workflow builder for AI agents",
     "url": "https://gumloop.com",
-    "logo_url": "https://global-uploads.webflow.com/63c99e014e0c889fd91a57a4/64ae3088dbf62b2d88d3b7d4_siteicon.png"
+    "logo_url": "https://gumloop.com/favicon.ico"
   },
   {
     "name": "Embedchain",
@@ -470,6 +470,6 @@
     "complexity_justification": "Gateway functionality simplifies LLM management but requires technical implementation.",
     "description": "LLM gateway for routing and monitoring",
     "url": "https://portkey.ai/",
-    "logo_url": "https://portkey.ai/favicon.png"
+    "logo_url": "https://portkey.ai/favicon.ico"
   }
 ]
