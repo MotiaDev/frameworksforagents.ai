@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
+import Image from 'next/image';
 
 interface FrameworkDetailsProps {
   framework: AgentFramework | null;
@@ -28,11 +29,48 @@ export default function FrameworkDetails({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{framework.name}</DialogTitle>
-          <DialogDescription>
-            {framework.category} • Code Level: {framework.code_level} • Complexity: {framework.complexity}
-          </DialogDescription>
+        <DialogHeader className="flex flex-col items-center sm:flex-row sm:items-start gap-4">
+          <div className="w-16 h-16 relative flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full overflow-hidden">
+            {framework.logo_url ? (
+              // For SVG files
+              <img 
+                src={framework.logo_url} 
+                alt={`${framework.name} logo`}
+                className="w-full h-full object-contain p-1"
+                onError={(e) => {
+                  // Fallback for missing logos, display initials
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const container = target.parentElement;
+                  if (container) {
+                    container.innerHTML = framework.name
+                      .split(' ')
+                      .slice(0, 2)
+                      .map(word => word[0])
+                      .join('')
+                      .toUpperCase();
+                    container.classList.add('text-lg', 'font-bold', 'text-gray-500');
+                  }
+                }}
+              />
+            ) : (
+              // Display initials if no logo
+              <span className="text-lg font-bold text-gray-500">
+                {framework.name
+                  .split(' ')
+                  .slice(0, 2)
+                  .map(word => word[0])
+                  .join('')
+                  .toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div>
+            <DialogTitle>{framework.name}</DialogTitle>
+            <DialogDescription>
+              {framework.category} • Code Level: {framework.code_level} • Complexity: {framework.complexity}
+            </DialogDescription>
+          </div>
         </DialogHeader>
         <div className="py-4">
           <div className="mb-4">

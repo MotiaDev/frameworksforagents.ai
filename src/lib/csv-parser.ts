@@ -9,6 +9,7 @@ export interface AgentFramework {
   complexity_justification: string;
   description: string;
   url: string;
+  logo_url: string;
 }
 
 export async function parseAgentFrameworks(): Promise<AgentFramework[]> {

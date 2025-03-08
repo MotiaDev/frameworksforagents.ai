@@ -1,0 +1,40 @@
+
+<\!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        .logo-container {
+            width: 100px;
+            height: 100px;
+            background-color: #4a86e8;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class='logo-container' id='logo'>AI</div>
+    <script>
+        // Get the logo element and set custom initials
+        const logoElement = document.getElementById('logo');
+        const urlParams = new URLSearchParams(window.location.search);
+        const initials = urlParams.get('initials') || 'AI';
+        logoElement.textContent = initials;
+    </script>
+</body>
+</html>
