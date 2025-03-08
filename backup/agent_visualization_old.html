@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Frameworks Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <style>
+        :root {
+            /* Base colors - darker and more sleek */
+            --background: hsl(222, 20%, 4%);
+            --foreground: hsl(210, 20%, 98%);
+            --card: hsl(222, 20%, 6%);
+            --card-foreground: hsl(210, 20%, 98%);
+            --popover: hsl(222, 20%, 7%);
+            --popover-foreground: hsl(210, 20%, 98%);
+            --primary: hsl(222, 20%, 8%);
+            --primary-foreground: hsl(210, 20%, 98%);
+            --secondary: hsl(222, 15%, 12%);
+            --secondary-foreground: hsl(210, 20%, 98%);
+            --muted: hsl(222, 15%, 14%);
+            --muted-foreground: hsl(215, 8%, 70%);
+            --accent: hsl(246, 45%, 55%);
+            --accent-foreground: hsl(210, 20%, 98%);
+            
+            /* Border and other UI elements */
+            --border: hsla(222, 20%, 18%, 0.4);
+            --border-strong: hsla(222, 20%, 24%, 0.6);
+            --input: hsl(222, 15%, 12%);
+            --ring: hsl(222, 15%, 30%);
+            --radius: 0.5rem;
+            
+            /* Brand colors */
+            --blue: hsl(220, 100%, 60%);
+            --blue-muted: hsla(220, 100%, 60%, 0.12);
+            --blue-dark: hsl(220, 100%, 45%);
+            --purple: hsl(270, 100%, 65%);
+            --purple-muted: hsla(270, 100%, 65%, 0.12);
+            --purple-dark: hsl(270, 100%, 50%);
+            --green: hsl(130, 60%, 55%);
+            --green-muted: hsla(130, 60%, 55%, 0.12);
+            
+            /* UI controls */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            line-height: 1.5;
+            font-weight: 400;
+            font-size: 15px;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1500px;
+            height: calc(100vh - 24px);
+            background-color: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-container {
+            padding: 1.5rem 2rem;
+            background: linear-gradient(135deg, hsla(222, 20%, 8%, 0.95), hsla(222, 20%, 5%, 0.95));
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-strong);
+            flex-shrink: 0;
+        }
+
+        .header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 10% 30%, var(--blue-muted) 0%, transparent 25%),
+                        radial-gradient(circle at 90% 70%, var(--purple-muted) 0%, transparent 25%);
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 800;
+            font-size: 2rem;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--blue), var(--purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .header-subtitle {
+            text-align: center;
+            color: var(--muted-foreground);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            max-width: 550px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 400;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 0.5rem 0 0;
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            background-color: var(--secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+        
+        .filter-checkbox:hover {
+            border-color: var(--border-strong);
+            background-color: var(--muted);
+        }
+
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 0.25rem;
+            border: 1px solid var(--border-strong);
+            background-color: var(--primary);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s ease;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: "";
+            position: absolute;
+            top: 0.2rem;
+            left: 0.35rem;
+            width: 0.25rem;
+            height: 0.5rem;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .chart-container {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #agentChart {
+            flex: 1;
+            width: 100%;
+            height: 100% !important;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 0.5rem 1.25rem;
+            width: fit-content;
+            margin: 0.5rem auto;
+            background-color: var(--secondary);
+            border-radius: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 10;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+        }
+
+        .logo-container {
+            position: absolute;
+            width: 2.5rem;
+            height: 2.5rem;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo-container:hover {
+            transform: translate(-50%, -50%) scale(1.15);
+            z-index: 20;
+        }
+
+        .logo-container img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 50%;
+            object-fit: contain;
+            box-shadow: var(--shadow-md);
+            background-color: var(--primary);
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+        
+        .logo-container:hover img {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-strong);
+        }
+
+        .tooltip {
+            position: absolute;
+            display: none;
+            background: var(--popover);
+            border: 1px solid var(--border-strong);
+            padding: 0.875rem 1rem;
+            border-radius: calc(var(--radius) - 0.125rem);
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            max-width: 18rem;
+            color: var(--popover-foreground);
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+            transition: opacity 0.2s ease;
+        }
+
+        .tooltip h3 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--foreground);
+            font-size: 1rem;
+            letter-spacing: -0.01em;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .tooltip p {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+            color: var(--muted-foreground);
+        }
+
+        .tooltip p strong {
+            color: var(--foreground);
+            font-weight: 500;
+        }
+
+        .tooltip a {
+            color: var(--accent);
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 0.75rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .tooltip a:hover {
+            text-decoration: underline;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            backdrop-filter: blur(6px);
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card);
+            border-radius: var(--radius);
+            max-width: 32rem;
+            width: 92%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            padding: 2.25rem;
+            position: relative;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            border: 1px solid var(--border-strong);
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+        
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--muted);
+            border-radius: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: var(--muted-foreground);
+            transition: all 0.2s ease;
+            width: 1.75rem;
+            height: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            border: 1px solid var(--border);
+        }
+
+        .modal-close:hover {
+            color: var(--foreground);
+            background-color: var(--muted);
+            border-color: var(--border-strong);
+        }
+
+        .modal-logo {
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .modal-logo img {
+            max-width: 5rem;
+            max-height: 5rem;
+            border-radius: 50%;
+            background-color: var(--primary);
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+        }
+
+        .modal-title {
+            text-align: center;
+            margin-top: 0.5rem;
+            margin-bottom: 1.75rem;
+            color: var(--foreground);
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        .modal-info {
+            margin-bottom: 1.75rem;
+            background-color: var(--primary);
+            border-radius: calc(var(--radius) - 0.125rem);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .modal-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .modal-info-label {
+            font-weight: 500;
+            color: var(--muted-foreground);
+            font-size: 0.9rem;
+        }
+
+        .modal-info-value {
+            color: var(--foreground);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .modal-info-value small {
+            color: var(--muted-foreground);
+            font-weight: 400;
+            font-size: 0.75rem;
+            margin-left: 0.25rem;
+        }
+
+        .modal-description {
+            line-height: 1.65;
+            color: var(--muted-foreground);
+            margin-bottom: 1.75rem;
+            padding: 1.25rem;
+            background-color: var(--primary);
+            border-radius: calc(var(--radius) - 0.125rem);
+            border: 1px solid var(--border);
+            font-size: 0.925rem;
+        }
+
+        .modal-link {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            color: white;
+            padding: 0.75rem 0;
+            border-radius: calc(var(--radius) - 0.125rem);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            letter-spacing: -0.01em;
+            font-size: 0.95rem;
+        }
+
+        .modal-link:hover {
+            text-decoration: none;
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Chart styling overrides */
+        #agentChart {
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+        
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .header-subtitle {
+                font-size: 0.875rem;
+            }
+            
+            .legend {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0.75rem 1rem;
+            }
+            
+            .modal-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-container">
+            <div class="header-bg"></div>
+            <div class="header-content">
+                <h1>AI Agent Frameworks Landscape</h1>
+                <p class="header-subtitle">Compare AI agent frameworks and orchestration tools across code requirements and implementation complexity</p>
+                
+                <div class="filters">
+                    <label class="filter-checkbox">
+                        <input type="checkbox" id="showAgentFrameworks" checked> 
+                        <span>Agent Frameworks</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" id="showOrchestration" checked> 
+                        <span>Orchestration Tools</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="agentChart"></canvas>
+            <div id="logo-overlay"></div>
+            <div id="tooltip" class="tooltip"></div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: var(--blue-muted);"></div>
+                <span>Agent Framework</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: var(--purple-muted);"></div>
+                <span>Orchestration</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for detailed information -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-logo">
+                <img id="modal-logo-img" src="" alt="Framework Logo">
+            </div>
+            <h2 class="modal-title" id="modal-title">Framework Name</h2>
+            <div class="modal-info">
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Category</span>
+                    <span id="modal-category" class="modal-info-value">Agent Framework</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Code Level</span>
+                    <span id="modal-code-level" class="modal-info-value">0.8<small>(0 = No-Code, 1 = Full-Code)</small></span>
+                </div>
+            </div>
+            
+            <div class="modal-description" id="modal-code-justification">
+                Code level justification goes here.
+            </div>
+            
+            <div class="modal-info" style="margin-top: 1.75rem;">
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Complexity</span>
+                    <span id="modal-complexity" class="modal-info-value">0.7<small>(0 = Simple, 1 = Complex)</small></span>
+                </div>
+            </div>
+            
+            <div class="modal-description" id="modal-complexity-justification">
+                Complexity justification goes here.
+            </div>
+            
+            <div class="modal-description" id="modal-description">
+                Description goes here.
+            </div>
+            <a href="#" class="modal-link" id="modal-website" target="_blank">Visit Website</a>
+        </div>
+    </div>
+
+    <script>
+        // Using verified favicon URLs per your list
+        const logoMap = {
+            "LangChain": "https://www.langchain.com/favicon.ico",
+            "LlamaIndex": "https://www.llamaindex.ai/favicon.ico",
+            "AutoGPT": "https://github.com/Significant-Gravitas/AutoGPT/raw/master/docs/assets/logo.png",
+            "CrewAI": "https://www.crewai.io/favicon.ico",
+            "SuperAGI": "https://superagi.com/wp-content/uploads/2023/05/SuperAGI-Logo.png",
+            "BabyAGI": "",  // Will use fallback
+            "AgentGPT": "https://agentgpt.reworkd.ai/favicon.ico",
+            "Haystack": "https://haystack.deepset.ai/favicon.ico",
+            "Langflow": "https://www.langflow.org/favicon.ico",
+            "Flowise": "https://flowiseai.com/favicon.ico",
+            "Breadboard": "",  // Will use fallback
+            "Fixie": "https://www.fixie.ai/favicon.ico",
+            "Microsoft Semantic Kernel": "https://github.com/microsoft/semantic-kernel/raw/main/dotnet/assets/icon.png",
+            "OpenAI Assistants API": "https://platform.openai.com/favicon.ico",
+            "Anthropic Claude API": "https://www.anthropic.com/favicon.ico",
+            "Gorilla": "",  // Will use fallback
+            "N8n": "https://n8n.io/favicon.ico",
+            "Airplane": "https://www.airplane.dev/favicon.ico",
+            "Zapier": "https://zapier.com/favicon.ico",
+            "Make (Integromat)": "https://www.make.com/favicon.ico",
+            "Activeloop Deep Lake": "https://www.activeloop.ai/favicon.ico",
+            "Autogen": "https://microsoft.github.io/autogen/img/autogen_icon.png",
+            "Parea AI": "https://www.parea.ai/favicon.ico",
+            "DSPy": "",  // Will use fallback
+            "Motia": "https://motia.dev/favicon.ico",
+            
+            // New additions
+            "Gumloop": "https://gumloop.com/favicon.ico",
+            "Embedchain": "https://github.com/embedchain/embedchain/raw/main/docs/logo.png",
+            "Steamship": "https://www.steamship.com/favicon.ico",
+            "LiteLLM": "https://github.com/BerriAI/litellm/raw/main/img/litellm%20-%20dark%20background.png",
+            "MindsDB": "https://mindsdb.com/favicon.ico",
+            "InstructLab": "",  // Will use fallback
+            "E2B": "https://e2b.dev/favicon.ico",
+            "NVIDIA NeMo": "https://developer.nvidia.com/favicon.ico",
+            "H2O AI": "https://h2o.ai/favicon.ico",
+            "Determined AI": "https://www.determined.ai/favicon.ico",
+            "Databricks": "https://www.databricks.com/favicon.ico",
+            "Chain Forge": "",  // Will use fallback
+            "Humanloop": "https://humanloop.com/favicon.ico",
+            "LMQL": "https://lmql.ai/favicon.ico",
+            "Instructor": "",  // Will use fallback
+            "Outlines": "",  // Will use fallback
+            "Guidance": "",  // Will use fallback
+            "Portkey": "https://portkey.ai/favicon.ico"
+        };
+
+        // Function to get fallback logo if the primary one fails
+        function getFallbackLogo(name, category) {
+            // Create a text logo with the first letter of each word
+            const initials = name.split(' ')
+                .map(word => word.charAt(0))
+                .join('')
+                .substring(0, 2)
+                .toUpperCase();
+
+            // Generate a consistent color based on the name
+            const getColorFromString = (str) => {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                let color = '#';
+                for (let i = 0; i < 3; i++) {
+                    const value = (hash >> (i * 8)) & 0xFF;
+                    color += ('00' + value.toString(16)).substr(-2);
+                }
+                return color;
+            };
+                
+            const canvas = document.createElement('canvas');
+            canvas.width = 80;
+            canvas.height = 80;
+            const ctx = canvas.getContext('2d');
+            
+            // Background color based on category
+            const bgColor = category === 'Agent Framework' ? 'rgba(54, 162, 235, 0.2)' : 'rgba(255, 99, 132, 0.2)';
+            const borderColor = category === 'Agent Framework' ? 'rgba(54, 162, 235, 0.8)' : 'rgba(255, 99, 132, 0.8)';
+            const initialsColor = getColorFromString(name);
+            
+            // Draw circle with border
+            ctx.fillStyle = bgColor;
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(40, 40, 35, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw text
+            ctx.fillStyle = initialsColor;
+            ctx.font = 'bold 32px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(initials, 40, 40);
+            
+            return canvas.toDataURL();
+        }
+
+        // Function to load and parse CSV data
+        async function loadData() {
+            try {
+                // Load the CSV file from the server
+                const response = await fetch('agent_frameworks.csv');
+                const csvData = await response.text();
+                
+                // Parse the CSV data
+                return new Promise(resolve => {
+                    Papa.parse(csvData, {
+                        header: true,
+                        dynamicTyping: true,
+                        complete: function(results) {
+                            resolve(results.data);
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error("Error loading CSV data:", error);
+                alert("Error loading the data. Please check the console for details.");
+                return [];
+            }
+        }
+
+        // Function to render the chart
+        async function renderChart() {
+            const data = await loadData();
+            
+            // Prepare data for the chart
+            const agentFrameworks = data.filter(item => item.category === 'Agent Framework');
+            const orchestrationTools = data.filter(item => item.category === 'Orchestration');
+            
+            // Set up Chart.js
+            const ctx = document.getElementById('agentChart').getContext('2d');
+            
+            // Create scatter chart instead of bubble for logo placement
+            const chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Agent Frameworks',
+                            data: agentFrameworks.map(item => ({
+                                x: item.code_level * 100,
+                                y: item.complexity * 100,
+                                name: item.name,
+                                description: item.description,
+                                code_level_justification: item.code_level_justification,
+                                complexity_justification: item.complexity_justification,
+                                url: item.url,
+                                category: item.category
+                            })),
+                            backgroundColor: 'var(--blue-muted)',
+                            borderColor: 'var(--blue)',
+                            borderWidth: 1,
+                            pointRadius: 0 // Hide the points since we'll use logos
+                        },
+                        {
+                            label: 'Orchestration Tools',
+                            data: orchestrationTools.map(item => ({
+                                x: item.code_level * 100,
+                                y: item.complexity * 100,
+                                name: item.name,
+                                description: item.description,
+                                code_level_justification: item.code_level_justification,
+                                complexity_justification: item.complexity_justification,
+                                url: item.url,
+                                category: item.category
+                            })),
+                            backgroundColor: 'var(--purple-muted)',
+                            borderColor: 'var(--purple)',
+                            borderWidth: 1,
+                            pointRadius: 0 // Hide the points since we'll use logos
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 10
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'No-Code (0) to Full-Code (100)',
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                font: {
+                                    family: 'Inter, sans-serif',
+                                    size: 14,
+                                    weight: 500
+                                }
+                            },
+                            min: 0,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)',
+                                borderColor: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                font: {
+                                    family: 'Inter, sans-serif',
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Complexity of Use (0-100)',
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                font: {
+                                    family: 'Inter, sans-serif',
+                                    size: 14,
+                                    weight: 500
+                                }
+                            },
+                            min: 0,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)',
+                                borderColor: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                font: {
+                                    family: 'Inter, sans-serif',
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            enabled: false // Disable default tooltips
+                        },
+                        legend: {
+                            display: false // We have our own custom legend
+                        }
+                    }
+                }
+            });
+            
+            // Function to add logos to the chart
+            function addLogosToChart() {
+                const logoOverlay = document.getElementById('logo-overlay');
+                logoOverlay.innerHTML = ''; // Clear existing logos
+                
+                const chartArea = chart.chartArea;
+                const xAxis = chart.scales.x;
+                const yAxis = chart.scales.y;
+                
+                // Combine both datasets
+                const allPoints = [
+                    ...chart.data.datasets[0].data.map(point => ({ ...point, category: 'Agent Framework' })),
+                    ...chart.data.datasets[1].data.map(point => ({ ...point, category: 'Orchestration' }))
+                ];
+                
+                // Only process points from visible datasets
+                const visiblePoints = allPoints.filter(point => {
+                    const datasetIndex = point.category === 'Agent Framework' ? 0 : 1;
+                    return !chart.data.datasets[datasetIndex].hidden;
+                });
+                
+                visiblePoints.forEach(point => {
+                    // Calculate pixel position
+                    const x = xAxis.getPixelForValue(point.x);
+                    const y = yAxis.getPixelForValue(point.y);
+                    
+                    // Create logo container
+                    const logoContainer = document.createElement('div');
+                    logoContainer.className = 'logo-container';
+                    logoContainer.style.left = x + 'px';
+                    logoContainer.style.top = y + 'px';
+                    
+                    // Create image element
+                    const img = document.createElement('img');
+                    img.alt = point.name;
+                    img.title = point.name;
+                    
+                    // Use logo from map or fallback
+                    const logoUrl = logoMap[point.name];
+                    img.onerror = function() {
+                        this.src = getFallbackLogo(point.name, point.category);
+                        this.onerror = null; // Prevent infinite loop
+                    };
+                    
+                    // If no logo URL is found, use fallback immediately
+                    if (logoUrl) {
+                        img.src = logoUrl;
+                    } else {
+                        img.src = getFallbackLogo(point.name, point.category);
+                    }
+                    
+                    // Add tooltip functionality
+                    logoContainer.addEventListener('mouseenter', function(e) {
+                        const tooltip = document.getElementById('tooltip');
+                        tooltip.innerHTML = `
+                            <h3>${point.name}</h3>
+                            <p><strong>Category:</strong> ${point.category}</p>
+                            <p><strong>Code Level:</strong> ${point.x / 100}</p>
+                            <p><strong>Complexity:</strong> ${point.y / 100}</p>
+                            <p>${point.description}</p>
+                            <a href="${point.url}" target="_blank">Visit Website</a>
+                        `;
+                        tooltip.style.display = 'block';
+                        
+                        // Position tooltip relative to logo
+                        const rect = logoContainer.getBoundingClientRect();
+                        tooltip.style.left = (rect.right + 10) + 'px';
+                        tooltip.style.top = (rect.top) + 'px';
+                        
+                        // Make sure tooltip doesn't go off-screen
+                        const tooltipRect = tooltip.getBoundingClientRect();
+                        const containerRect = document.querySelector('.container').getBoundingClientRect();
+                        
+                        if (tooltipRect.right > containerRect.right) {
+                            tooltip.style.left = (rect.left - tooltipRect.width - 10) + 'px';
+                        }
+                    });
+                    
+                    logoContainer.addEventListener('mouseleave', function() {
+                        document.getElementById('tooltip').style.display = 'none';
+                    });
+                    
+                    // Add click to show detailed modal
+                    logoContainer.addEventListener('click', function() {
+                        showModal(point);
+                    });
+                    
+                    logoContainer.appendChild(img);
+                    logoOverlay.appendChild(logoContainer);
+                });
+            }
+            
+            // Add logos after chart is rendered
+            if (chart.options.animation) {
+                chart.options.animation.onComplete = function() {
+                    addLogosToChart();
+                };
+            } else {
+                // If animation is not available
+                setTimeout(addLogosToChart, 500);
+            }
+            
+            // Update logos on window resize
+            window.addEventListener('resize', function() {
+                setTimeout(addLogosToChart, 100);
+            });
+            
+            // Set up filters
+            document.getElementById('showAgentFrameworks').addEventListener('change', function(e) {
+                chart.data.datasets[0].hidden = !e.target.checked;
+                chart.update();
+                setTimeout(addLogosToChart, 500); // Update logos after animation
+            });
+            
+            document.getElementById('showOrchestration').addEventListener('change', function(e) {
+                chart.data.datasets[1].hidden = !e.target.checked;
+                chart.update();
+                setTimeout(addLogosToChart, 500); // Update logos after animation
+            });
+            
+            // Ensure logos are added after initial render
+            setTimeout(addLogosToChart, 500);
+        }
+        
+        // Initialize the chart when the page loads
+        window.addEventListener('load', renderChart);
+        
+        // Modal functionality
+        function showModal(point) {
+            const modal = document.getElementById('detailModal');
+            const logoImg = document.getElementById('modal-logo-img');
+            const title = document.getElementById('modal-title');
+            const category = document.getElementById('modal-category');
+            const codeLevel = document.getElementById('modal-code-level');
+            const codeLevelJustification = document.getElementById('modal-code-justification');
+            const complexity = document.getElementById('modal-complexity');
+            const complexityJustification = document.getElementById('modal-complexity-justification');
+            const description = document.getElementById('modal-description');
+            const website = document.getElementById('modal-website');
+            
+            // Set content
+            title.textContent = point.name;
+            category.textContent = point.category;
+            codeLevel.textContent = (point.x / 100).toFixed(2);
+            complexity.textContent = (point.y / 100).toFixed(2);
+            
+            // Set justifications
+            codeLevelJustification.textContent = point.code_level_justification || "No justification provided.";
+            complexityJustification.textContent = point.complexity_justification || "No justification provided.";
+            
+            description.textContent = point.description;
+            website.href = point.url;
+            
+            // Set logo
+            const logoUrl = logoMap[point.name];
+            if (logoUrl) {
+                logoImg.src = logoUrl;
+                logoImg.onerror = function() {
+                    this.src = getFallbackLogo(point.name, point.category);
+                };
+            } else {
+                logoImg.src = getFallbackLogo(point.name, point.category);
+            }
+            
+            // Show modal with animation
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+                setTimeout(() => {
+                    document.querySelector('.modal-content').style.opacity = 1;
+                    document.querySelector('.modal-content').style.transform = 'translateY(0)';
+                }, 50);
+            }, 10);
+        }
+        
+        // Close modal when clicking the X
+        document.querySelector('.modal-close').addEventListener('click', closeModal);
+        
+        // Close modal when clicking outside of it
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Close modal when ESC key is pressed
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+        
+        function closeModal() {
+            const modal = document.getElementById('detailModal');
+            document.querySelector('.modal-content').style.opacity = 0;
+            document.querySelector('.modal-content').style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }, 100);
+        }
+    </script>
+</body>
+</html>
