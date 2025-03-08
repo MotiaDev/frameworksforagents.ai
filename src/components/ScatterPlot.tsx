@@ -220,26 +220,45 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
   }, [frameworks]);
 
   const options: ChartOptions<'scatter'> = {
+    responsive: true,
+    maintainAspectRatio: false,
     scales: {
       x: {
         title: {
           display: true,
-          text: 'Code Level (0 = No Code, 1 = Advanced Coding)'
+          text: 'Code Level (0 = No Code, 1 = Advanced Coding)',
+          padding: {top: 10, bottom: 10}
         },
         min: 0,
-        max: 1
+        max: 1,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        }
       },
       y: {
         title: {
           display: true,
-          text: 'Complexity (0 = Simple, 1 = Complex)'
+          text: 'Complexity (0 = Simple, 1 = Complex)',
+          padding: {top: 10, bottom: 10}
         },
         min: 0,
-        max: 1
+        max: 1,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        }
       }
     },
     plugins: {
       tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 14,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 13
+        },
+        padding: 10,
         callbacks: {
           label: (context) => {
             const data = context.raw as any;
@@ -255,13 +274,22 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
           }
         }
       },
+      legend: {
+        position: 'top',
+        labels: {
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
       zoom: {
         zoom: {
           wheel: {
             enabled: true,
+            speed: 0.05
           },
           pinch: {
-            enabled: true,
+            enabled: true
           },
           mode: 'xy',
           scaleMode: 'xy',
@@ -269,12 +297,17 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
         pan: {
           enabled: true,
           mode: 'xy',
+          threshold: 5
         },
         limits: {
           x: {min: -0.2, max: 1.2},
           y: {min: -0.2, max: 1.2}
         }
       }
+    },
+    animation: {
+      duration: 1000,
+      easing: 'easeOutQuart'
     },
     onClick: (event, elements) => {
       if (elements.length > 0) {
@@ -303,16 +336,18 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
   if (!chartData) return <div>Loading...</div>;
 
   return (
-    <div className="w-full h-full p-4">
-      <div className="flex justify-end mb-2">
+    <div className="w-full h-full">
+      <div className="absolute top-20 right-4 z-10">
         <button 
           onClick={resetZoom}
-          className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
+          className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded-md transition-colors shadow-md"
         >
           Reset Zoom
         </button>
       </div>
-      <Scatter ref={chartRef} data={chartData} options={options} />
+      <div className="w-full h-full">
+        <Scatter ref={chartRef} data={chartData} options={options} />
+      </div>
       <FrameworkDetails 
         framework={selectedFramework} 
         open={dialogOpen} 
