@@ -1,19 +1,13 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { 
-  Chart as ChartJS, 
-  LinearScale, 
-  PointElement, 
-  Tooltip, 
-  Legend,
-  ChartOptions,
-  zoom
-} from 'chart.js';
-import zoomPlugin from 'chartjs-plugin-zoom';
-import { Scatter } from 'react-chartjs-2';
 import { AgentFramework } from '@/lib/csv-parser';
 import FrameworkDetails from './FrameworkDetails';
+import dynamic from 'next/dynamic';
+
+// Dynamically import chart.js components with no SSR
+const ChartJSImports = dynamic(() => import('./ChartJSImports'), { ssr: false });
+const Scatter = dynamic(() => import('react-chartjs-2').then(mod => mod.Scatter), { ssr: false });
 // Import the browser's native Image constructor instead of Next.js Image component
 // Custom plugin for rendering logos inside points
 const logoImages: Record<string, HTMLImageElement> = {};
@@ -129,7 +123,8 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
   }
 });
 
-// Will register ChartJS components in a useEffect when component mounts
+// ChartJS components will be dynamically registered when component mounts
+// This must happen before any chart is rendered!
 
 interface ScatterPlotProps {
   frameworks: AgentFramework[];
@@ -212,10 +207,11 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
               originalY: framework.complexity
             };
           }),
-          backgroundColor: 'transparent', // Using transparent since we're rendering our own circles
+          backgroundColor: 'rgba(100, 100, 255, 0.5)',
           pointRadius: 18, // Slightly larger to make logos more visible
           pointHoverRadius: 22,
           pointStyle: 'circle',
+          hitRadius: 30, // Increase hit area for better clickability
         }
       ],
     });
@@ -226,6 +222,8 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
   
   // Register ChartJS components and plugins
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     // Check initial dark mode preference
     const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const isDarkMode = darkModeQuery.matches;
@@ -234,45 +232,42 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
     // Create the logo plugin with current dark mode
     const logoPluginInstance = createLogoPlugin(isDarkMode);
     
-    // Register all components and plugins
-    ChartJS.register(
-      LinearScale, 
-      PointElement, 
-      Tooltip, 
-      Legend, 
-      logoPluginInstance,
-      zoomPlugin
-    );
-    
-    // Add listener for changes in color scheme preference
-    const darkModeListener = (e: MediaQueryListEvent) => {
-      setPrefersDarkMode(e.matches);
+    // Import Chart.js - note we're not importing components here as they're already registered in ChartJSImports
+    import('chart.js').then(({ Chart: ChartJS }) => {
+      // Register logo plugin
+      ChartJS.register(logoPluginInstance);
       
-      // Unregister old plugin and register new one with updated dark mode
-      ChartJS.unregister(logoPluginInstance);
-      const updatedLogoPlugin = createLogoPlugin(e.matches);
-      ChartJS.register(updatedLogoPlugin);
+      // Add listener for changes in color scheme preference
+      const darkModeListener = (e: MediaQueryListEvent) => {
+        setPrefersDarkMode(e.matches);
+        
+        // Unregister old plugin and register new one with updated dark mode
+        ChartJS.unregister(logoPluginInstance);
+        const updatedLogoPlugin = createLogoPlugin(e.matches);
+        ChartJS.register(updatedLogoPlugin);
+        
+        // Force chart update if we have a reference
+        if (chartRef.current) {
+          chartRef.current.update();
+        }
+      };
       
-      // Force chart update if we have a reference
-      if (chartRef.current) {
-        chartRef.current.update();
-      }
-    };
-    
-    darkModeQuery.addEventListener('change', darkModeListener);
-    
-    // Clean up
-    return () => {
-      darkModeQuery.removeEventListener('change', darkModeListener);
-      ChartJS.unregister(logoPluginInstance);
-    };
+      darkModeQuery.addEventListener('change', darkModeListener);
+      
+      // Clean up
+      return () => {
+        darkModeQuery.removeEventListener('change', darkModeListener);
+        ChartJS.unregister(logoPluginInstance);
+      };
+    });
   }, []);
   
-  const options: ChartOptions<'scatter'> = {
+  const options: any = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
       x: {
+        type: 'linear',
         title: {
           display: true,
           text: 'Code Level',
@@ -289,6 +284,7 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
         }
       },
       y: {
+        type: 'linear',
         title: {
           display: true,
           text: 'Complexity',
@@ -320,7 +316,7 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
         cornerRadius: 6,
         padding: 8,
         callbacks: {
-          label: (context) => {
+          label: (context: any) => {
             const data = context.raw as any;
             // Use original values if available, otherwise use the displayed values
             const codeLevel = data.originalX !== undefined ? data.originalX : data.x;
@@ -377,18 +373,22 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
       duration: 1000,
       easing: 'easeOutQuart'
     },
-    onClick: (event, elements) => {
-      if (elements.length > 0) {
+    onClick: (event: any, elements: any, chart: any) => {
+      console.log("Chart clicked", event, elements);
+      if (elements && elements.length > 0) {
         const { datasetIndex, index } = elements[0];
-        const chart = chartRef.current;
         
-        if (chart) {
+        if (chart && chart.data && chart.data.datasets) {
           const dataPoint = chart.data.datasets[datasetIndex].data[index];
-          const framework = frameworksByName.current[dataPoint.name];
-          
-          if (framework) {
-            setSelectedFramework(framework);
-            setDialogOpen(true);
+          if (dataPoint && dataPoint.name) {
+            console.log("Point clicked:", dataPoint.name);
+            const framework = frameworksByName.current[dataPoint.name];
+            
+            if (framework) {
+              console.log("Opening framework dialog:", framework.name);
+              setSelectedFramework(framework);
+              setDialogOpen(true);
+            }
           }
         }
       }
@@ -401,8 +401,9 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
     }
   };
 
+  // Make sure both ChartJS and chart data are loaded
   if (!chartData) return <div>Loading...</div>;
-
+  
   return (
     <div className="w-full h-full">
       <div className="absolute top-14 right-4 z-10">
@@ -415,12 +416,17 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
         </button>
       </div>
       <div className="w-full h-full">
+        {/* ChartJSImports must be included before any chart is rendered */}
+        <ChartJSImports />
         <Scatter ref={chartRef} data={chartData} options={options} />
       </div>
       <FrameworkDetails 
         framework={selectedFramework} 
         open={dialogOpen} 
-        onOpenChange={setDialogOpen} 
+        onOpenChange={(open) => {
+          console.log("Dialog open change:", open);
+          setDialogOpen(open);
+        }} 
       />
     </div>
   );
