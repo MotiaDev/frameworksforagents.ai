@@ -155,6 +155,25 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
 // ChartJS components will be dynamically registered when component mounts
 // This must happen before any chart is rendered!
 
+// Define the possible axis metrics for the chart
+export type AxisMetric = {
+  key: keyof AgentFramework;
+  label: string;
+  description: string;
+  isNumeric: boolean;
+}
+
+// Define all available metrics that can be used for axes
+export const availableMetrics: AxisMetric[] = [
+  { key: 'code_level', label: 'Code Level', description: 'Amount of coding required (0 = no code, 1 = heavy coding)', isNumeric: true },
+  { key: 'complexity', label: 'Complexity', description: 'Overall complexity of the solution (0 = simple, 1 = complex)', isNumeric: true },
+  { key: 'learning_curve', label: 'Learning Curve', description: 'Steepness of the learning curve (0 = easy to learn, 1 = difficult to master)', isNumeric: true },
+  { key: 'scalability', label: 'Scalability', description: 'How well the framework scales (0 = limited scalability, 1 = highly scalable)', isNumeric: true },
+  { key: 'integration_score', label: 'Integration', description: 'Ease of integration with other systems (0 = limited integrations, 1 = extensive integrations)', isNumeric: true },
+  { key: 'observability', label: 'Observability', description: 'Level of monitoring and observability (0 = limited visibility, 1 = comprehensive monitoring)', isNumeric: true },
+  { key: 'programming_language_support', label: 'Language Support', description: 'Breadth of programming language support (0 = single language, 1 = many languages)', isNumeric: true },
+];
+
 interface ScatterPlotProps {
   frameworks: AgentFramework[];
 }
@@ -164,9 +183,47 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
   const [selectedFramework, setSelectedFramework] = useState<AgentFramework | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const chartRef = useRef<any>(null);
-
+  
+  // State for axis selection
+  const [xAxisMetric, setXAxisMetric] = useState<AxisMetric>(availableMetrics[0]);
+  const [yAxisMetric, setYAxisMetric] = useState<AxisMetric>(availableMetrics[1]);
+  
+  // State for filters
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
+  const [hasUIFilter, setHasUIFilter] = useState<boolean | null>(null);
+  const [minLearningCurve, setMinLearningCurve] = useState<number>(0);
+  const [maxLearningCurve, setMaxLearningCurve] = useState<number>(1);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Gather unique categories for filter options
+  const uniqueCategories = Array.from(new Set(frameworks.map(f => f.category)));
+  
   // Create lookup maps for efficiently finding frameworks by name
   const frameworksByName = useRef<Record<string, AgentFramework>>({});
+  
+  // Filter frameworks based on selected filters
+  const getFilteredFrameworks = (): AgentFramework[] => {
+    return frameworks.filter(framework => {
+      // Filter by category if any categories are selected
+      if (categoryFilter.length > 0 && !categoryFilter.includes(framework.category)) {
+        return false;
+      }
+      
+      // Filter by UI availability if UI filter is set
+      if (hasUIFilter !== null && framework.user_interface_availability !== hasUIFilter) {
+        return false;
+      }
+      
+      // Filter by learning curve range
+      if (framework.learning_curve !== undefined) {
+        if (framework.learning_curve < minLearningCurve || framework.learning_curve > maxLearningCurve) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  };
   
   useEffect(() => {
     // Build lookup map
@@ -210,14 +267,22 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
     // Create a map to track positions and avoid overlaps
     const positionMap: Record<string, {frameworks: string[], count: number}> = {};
     
+    // Apply filters to get the current set of frameworks to display
+    const filteredFrameworks = getFilteredFrameworks();
+    
     setChartData({
       datasets: [
         {
           label: 'AI Agent Tools',
-          data: frameworks.map(framework => {
-            // Create a unique position for each point
-            let x = framework.code_level;
-            let y = framework.complexity;
+          data: filteredFrameworks.map(framework => {
+            // Get the values for the selected axes with fallbacks
+            let x = framework[xAxisMetric.key] as number;
+            let y = framework[yAxisMetric.key] as number;
+            
+            // Handle undefined values (fall back to 0)
+            if (x === undefined) x = 0;
+            if (y === undefined) y = 0;
+            
             const key = `${x.toFixed(2)},${y.toFixed(2)}`;
             
             // Track overlapping frameworks at each position
@@ -232,17 +297,25 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
               y = addDeterministicJitter(y, framework.name);
             }
             
+            // For URL backwards compatibility
+            const url = framework.website_url || framework.url || framework.github_url;
+            
             return {
               x,
               y,
               name: framework.name,
               description: framework.description,
               category: framework.category,
-              url: framework.url,
+              url: url,
               logo_url: framework.logo_url,
-              // Store original values for tooltip and lookup
-              originalX: framework.code_level,
-              originalY: framework.complexity
+              // Store all relevant data for tooltips
+              originalX: framework[xAxisMetric.key] as number || 0,
+              originalY: framework[yAxisMetric.key] as number || 0,
+              xAxisKey: xAxisMetric.key,
+              yAxisKey: yAxisMetric.key,
+              hasUI: framework.user_interface_availability,
+              learningCurve: framework.learning_curve,
+              programming_languages: framework.programming_language
             };
           }),
           backgroundColor: 'transparent', // Using transparent since we're rendering our own circles
@@ -253,7 +326,7 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
         }
       ],
     });
-  }, [frameworks]);
+  }, [frameworks, xAxisMetric, yAxisMetric, categoryFilter, hasUIFilter, minLearningCurve, maxLearningCurve]);
 
   // Determine if we're in dark mode using state to make it reactive
   const [prefersDarkMode, setPrefersDarkMode] = useState(false);
@@ -315,7 +388,7 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
         type: 'linear',
         title: {
           display: true,
-          text: 'Code Level',
+          text: xAxisMetric.label,
           padding: {top: 5, bottom: 5},
           color: prefersDarkMode ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)'
         },
@@ -332,7 +405,7 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
         type: 'linear',
         title: {
           display: true,
-          text: 'Complexity',
+          text: yAxisMetric.label,
           padding: {top: 5, bottom: 5},
           color: prefersDarkMode ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)'
         },
@@ -364,15 +437,33 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
           label: (context: any) => {
             const data = context.raw as any;
             // Use original values if available, otherwise use the displayed values
-            const codeLevel = data.originalX !== undefined ? data.originalX : data.x;
-            const complexity = data.originalY !== undefined ? data.originalY : data.y;
-            return [
+            const xValue = data.originalX !== undefined ? data.originalX : data.x;
+            const yValue = data.originalY !== undefined ? data.originalY : data.y;
+            
+            let tooltipLines = [
               `${data.name}`,
               `Type: ${data.category}`,
-              `Code Level: ${codeLevel.toFixed(1)}`,
-              `Complexity: ${complexity.toFixed(1)}`,
-              `${data.description}`
+              `${xAxisMetric.label}: ${xValue.toFixed(1)}`,
+              `${yAxisMetric.label}: ${yValue.toFixed(1)}`
             ];
+            
+            // Add programming languages if available
+            if (data.programming_languages && data.programming_languages.length > 0) {
+              tooltipLines.push(`Languages: ${data.programming_languages.join(', ')}`);
+            }
+            
+            // Add UI availability if known
+            if (data.hasUI !== undefined) {
+              tooltipLines.push(`Has UI: ${data.hasUI ? 'Yes' : 'No'}`);
+            }
+            
+            // Add a shortened description
+            const shortDescription = data.description.length > 100 
+              ? data.description.substring(0, 100) + '...' 
+              : data.description;
+            tooltipLines.push(shortDescription);
+            
+            return tooltipLines;
           }
         }
       },
@@ -467,8 +558,145 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
   // Make sure both ChartJS and chart data are loaded
   if (!chartData) return <div>Loading...</div>;
   
+  // Handlers for axis and filter changes
+  const handleXAxisChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedMetric = availableMetrics.find(m => m.key === e.target.value);
+    if (selectedMetric) setXAxisMetric(selectedMetric);
+  };
+  
+  const handleYAxisChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedMetric = availableMetrics.find(m => m.key === e.target.value);
+    if (selectedMetric) setYAxisMetric(selectedMetric);
+  };
+  
+  const handleCategoryToggle = (category: string) => {
+    setCategoryFilter(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category) 
+        : [...prev, category]
+    );
+  };
+  
   return (
     <div className="w-full h-full">
+      {/* Control panel */}
+      <div className="absolute top-14 left-4 z-10 flex flex-col gap-2">
+        <div className="bg-card rounded shadow-md p-3 border border-border max-w-64">
+          <h3 className="text-sm font-medium mb-2">Axis Settings</h3>
+          <div className="flex flex-col gap-2">
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">X-Axis</label>
+              <select 
+                value={xAxisMetric.key}
+                onChange={handleXAxisChange}
+                className="w-full text-xs p-1.5 rounded border border-border bg-input text-foreground"
+              >
+                {availableMetrics.map(metric => (
+                  <option key={`x-${metric.key}`} value={metric.key}>{metric.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Y-Axis</label>
+              <select 
+                value={yAxisMetric.key}
+                onChange={handleYAxisChange}
+                className="w-full text-xs p-1.5 rounded border border-border bg-input text-foreground"
+              >
+                {availableMetrics.map(metric => (
+                  <option key={`y-${metric.key}`} value={metric.key}>{metric.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="bg-secondary text-secondary-foreground hover:bg-muted px-3 py-1.5 text-xs rounded shadow-md border border-border"
+        >
+          {showFilters ? 'Hide Filters' : 'Show Filters'}
+        </button>
+        
+        {showFilters && (
+          <div className="bg-card rounded shadow-md p-3 border border-border max-w-64">
+            <h3 className="text-sm font-medium mb-2">Filters</h3>
+            
+            <div className="mb-3">
+              <label className="text-xs text-muted-foreground block mb-1">Categories</label>
+              <div className="flex flex-wrap gap-1">
+                {uniqueCategories.map(category => (
+                  <button
+                    key={category}
+                    onClick={() => handleCategoryToggle(category)}
+                    className={`text-xs px-2 py-0.5 rounded-full ${
+                      categoryFilter.includes(category)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="mb-3">
+              <label className="text-xs text-muted-foreground block mb-1">User Interface</label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setHasUIFilter(hasUIFilter === true ? null : true)}
+                  className={`text-xs px-2 py-0.5 rounded ${
+                    hasUIFilter === true
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-secondary text-secondary-foreground'
+                  }`}
+                >
+                  Has UI
+                </button>
+                <button
+                  onClick={() => setHasUIFilter(hasUIFilter === false ? null : false)}
+                  className={`text-xs px-2 py-0.5 rounded ${
+                    hasUIFilter === false
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-secondary text-secondary-foreground'
+                  }`}
+                >
+                  No UI
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">
+                Learning Curve: {minLearningCurve.toFixed(1)} - {maxLearningCurve.toFixed(1)}
+              </label>
+              <div className="flex items-center gap-2 px-1">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={minLearningCurve}
+                  onChange={(e) => setMinLearningCurve(parseFloat(e.target.value))}
+                  className="w-full"
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={maxLearningCurve}
+                  onChange={(e) => setMaxLearningCurve(parseFloat(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Reset zoom button */}
       <div className="absolute top-14 right-4 z-10">
         <button 
           onClick={resetZoom}
@@ -478,11 +706,15 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
           Reset View
         </button>
       </div>
+      
+      {/* Chart area */}
       <div className="w-full h-full">
         {/* ChartJSImports must be included before any chart is rendered */}
         <ChartJSImports />
         <Scatter ref={chartRef} data={chartData} options={options} />
       </div>
+      
+      {/* Framework details modal */}
       <FrameworkDetails 
         framework={selectedFramework} 
         open={dialogOpen} 
