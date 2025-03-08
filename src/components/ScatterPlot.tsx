@@ -55,10 +55,26 @@ const logoPlugin = {
           
           // Draw logo or initials
           const logo = logoImages[name];
-          if (logo && logo.complete && logo.naturalHeight !== 0) {
-            ctx.drawImage(logo, x, y, size, size);
-          } else {
-            // Fallback to drawing initials
+          try {
+            if (logo && logo.complete && logo.naturalHeight !== 0) {
+              // Try to draw the logo image
+              ctx.save();
+              ctx.beginPath();
+              ctx.arc(point.x, point.y, size / 2, 0, 2 * Math.PI);
+              ctx.closePath();
+              ctx.clip();
+              ctx.drawImage(logo, x, y, size, size);
+              ctx.restore();
+            } else {
+              // Fallback to drawing initials
+              if (typeof window !== 'undefined') {
+                const initialsSVG = new window.Image();
+                initialsSVG.src = createSVGInitials(name);
+                ctx.drawImage(initialsSVG, x, y, size, size);
+              }
+            }
+          } catch (error) {
+            // If there's any error drawing the logo, fall back to initials
             if (typeof window !== 'undefined') {
               const initialsSVG = new window.Image();
               initialsSVG.src = createSVGInitials(name);
@@ -98,6 +114,17 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
       // Preload logo images for the chart plugin
       if (framework.logo_url && !logoImages[framework.name] && typeof window !== 'undefined') {
         const img = new window.Image();
+        img.crossOrigin = 'anonymous'; // Allow cross-origin loading
+        
+        // Add error handling
+        img.onerror = () => {
+          console.warn(`Failed to load logo for ${framework.name}`);
+          // Create a fallback initial image
+          const fallbackImg = new window.Image();
+          fallbackImg.src = createSVGInitials(framework.name);
+          logoImages[framework.name] = fallbackImg;
+        };
+        
         img.src = framework.logo_url;
         logoImages[framework.name] = img;
       }
