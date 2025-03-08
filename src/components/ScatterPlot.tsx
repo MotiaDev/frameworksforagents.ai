@@ -18,7 +18,7 @@ import FrameworkDetails from './FrameworkDetails';
 // Custom plugin for rendering logos inside points
 const logoImages: Record<string, HTMLImageElement> = {};
 
-// Create SVG text for initials as a fallback
+// Create SVG text for initials as a fallback with improved styling
 const createSVGInitials = (name: string): string => {
   const initials = name.split(' ')
     .slice(0, 2)
@@ -26,13 +26,26 @@ const createSVGInitials = (name: string): string => {
     .join('')
     .toUpperCase();
   
+  // Color the initials based on the name to provide variety
+  const colors = [
+    '#4285F4', '#EA4335', '#FBBC05', '#34A853', // Google colors
+    '#007BFF', '#6610F2', '#6F42C1', '#E83E8C', // Bootstrap colors
+    '#FF5722', '#009688', '#673AB7', '#3F51B5'  // Material colors
+  ];
+  
+  // Use a hash function to consistently assign the same color to the same name
+  const nameHash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const colorIndex = nameHash % colors.length;
+  const initialsColor = colors[colorIndex];
+  
   return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
     <circle cx="16" cy="16" r="16" fill="white" />
-    <text x="16" y="21" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle">${initials}</text>
+    <text x="16" y="22" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="${initialsColor}">${initials}</text>
   </svg>`;
 };
 
-const logoPlugin = {
+// Create the logo plugin with a closure to capture the dark mode state
+const createLogoPlugin = (isDarkMode: boolean) => ({
   id: 'logoPlugin',
   beforeDraw: (chart: any) => {
     const ctx = chart.ctx;
@@ -47,30 +60,53 @@ const logoPlugin = {
           const x = point.x - size / 2;
           const y = point.y - size / 2;
           
-          // Draw point circle background
+          // Draw background for the logo (white circle)
           ctx.beginPath();
           ctx.arc(point.x, point.y, size / 2, 0, 2 * Math.PI);
-          ctx.fillStyle = dataset.backgroundColor;
+          ctx.fillStyle = '#ffffff';
           ctx.fill();
+          
+          // Draw colored border with subtle glow
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, size / 2, 0, 2 * Math.PI);
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = isDarkMode ? 'rgba(150, 150, 255, 0.8)' : 'rgba(100, 100, 255, 0.8)';
+          ctx.stroke();
+          
+          // Add subtle outer glow
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, size / 2 + 2, 0, 2 * Math.PI);
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = isDarkMode ? 'rgba(150, 150, 255, 0.3)' : 'rgba(100, 100, 255, 0.3)';
+          ctx.stroke();
           
           // Draw logo or initials
           const logo = logoImages[name];
           try {
             if (logo && logo.complete && logo.naturalHeight !== 0) {
-              // Try to draw the logo image
+              // Draw the logo with a circular mask
               ctx.save();
               ctx.beginPath();
-              ctx.arc(point.x, point.y, size / 2, 0, 2 * Math.PI);
+              ctx.arc(point.x, point.y, size / 2 - 2, 0, 2 * Math.PI);
               ctx.closePath();
               ctx.clip();
-              ctx.drawImage(logo, x, y, size, size);
+              
+              // Draw image with small margin for better appearance
+              const margin = 4;
+              ctx.drawImage(logo, x + margin/2, y + margin/2, size - margin, size - margin);
               ctx.restore();
             } else {
               // Fallback to drawing initials
               if (typeof window !== 'undefined') {
                 const initialsSVG = new window.Image();
                 initialsSVG.src = createSVGInitials(name);
+                
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, size / 2 - 2, 0, 2 * Math.PI);
+                ctx.clip();
                 ctx.drawImage(initialsSVG, x, y, size, size);
+                ctx.restore();
               }
             }
           } catch (error) {
@@ -78,19 +114,22 @@ const logoPlugin = {
             if (typeof window !== 'undefined') {
               const initialsSVG = new window.Image();
               initialsSVG.src = createSVGInitials(name);
+              
+              ctx.save();
+              ctx.beginPath();
+              ctx.arc(point.x, point.y, size / 2 - 2, 0, 2 * Math.PI);
+              ctx.clip();
               ctx.drawImage(initialsSVG, x, y, size, size);
+              ctx.restore();
             }
           }
         }
       });
     });
   }
-};
+});
 
-// Register ChartJS components conditionally
-if (typeof window !== 'undefined') {
-  ChartJS.register(LinearScale, PointElement, Tooltip, Legend, logoPlugin, zoomPlugin);
-}
+// Will register ChartJS components in a useEffect when component mounts
 
 interface ScatterPlotProps {
   frameworks: AgentFramework[];
@@ -131,10 +170,6 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
     });
     frameworksByName.current = lookupMap;
 
-    // Group frameworks by category
-    const agentFrameworks = frameworks.filter(f => f.category === 'Agent Framework');
-    const orchestrationTools = frameworks.filter(f => f.category === 'Orchestration');
-
     // Add a jitter function to slightly move overlapping points
     const addJitter = (value: number, amount: number = 0.02): number => {
       // Don't jitter if the value is 0 or 1, to maintain boundary points
@@ -148,8 +183,8 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
     setChartData({
       datasets: [
         {
-          label: 'Agent Frameworks',
-          data: agentFrameworks.map(framework => {
+          label: 'AI Agent Tools',
+          data: frameworks.map(framework => {
             // Create a unique position for each point
             let x = framework.code_level;
             let y = framework.complexity;
@@ -169,6 +204,7 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
               y,
               name: framework.name,
               description: framework.description,
+              category: framework.category, // Keep category for tooltip but don't filter by it
               url: framework.url,
               logo_url: framework.logo_url,
               // Store original values for tooltip
@@ -176,49 +212,62 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
               originalY: framework.complexity
             };
           }),
-          backgroundColor: 'rgba(255, 99, 132, 0.5)',
-          pointRadius: 16, // Increased to make room for logos
-          pointHoverRadius: 20,
+          backgroundColor: 'transparent', // Using transparent since we're rendering our own circles
+          pointRadius: 18, // Slightly larger to make logos more visible
+          pointHoverRadius: 22,
           pointStyle: 'circle',
-        },
-        {
-          label: 'Orchestration Tools',
-          data: orchestrationTools.map(framework => {
-            // Create a unique position for each point
-            let x = framework.code_level;
-            let y = framework.complexity;
-            const key = `${x.toFixed(2)},${y.toFixed(2)}`;
-            
-            // If this position is already taken, add jitter until we find a free spot
-            if (positionMap[key]) {
-              x = addJitter(x);
-              y = addJitter(y);
-              positionMap[`${x.toFixed(2)},${y.toFixed(2)}`] = true;
-            } else {
-              positionMap[key] = true;
-            }
-            
-            return {
-              x,
-              y,
-              name: framework.name,
-              description: framework.description,
-              url: framework.url,
-              logo_url: framework.logo_url,
-              // Store original values for tooltip
-              originalX: framework.code_level,
-              originalY: framework.complexity
-            };
-          }),
-          backgroundColor: 'rgba(53, 162, 235, 0.5)',
-          pointRadius: 16, // Increased to make room for logos
-          pointHoverRadius: 20,
-          pointStyle: 'circle',
-        },
+        }
       ],
     });
   }, [frameworks]);
 
+  // Determine if we're in dark mode using state to make it reactive
+  const [prefersDarkMode, setPrefersDarkMode] = useState(false);
+  
+  // Register ChartJS components and plugins
+  useEffect(() => {
+    // Check initial dark mode preference
+    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const isDarkMode = darkModeQuery.matches;
+    setPrefersDarkMode(isDarkMode);
+    
+    // Create the logo plugin with current dark mode
+    const logoPluginInstance = createLogoPlugin(isDarkMode);
+    
+    // Register all components and plugins
+    ChartJS.register(
+      LinearScale, 
+      PointElement, 
+      Tooltip, 
+      Legend, 
+      logoPluginInstance,
+      zoomPlugin
+    );
+    
+    // Add listener for changes in color scheme preference
+    const darkModeListener = (e: MediaQueryListEvent) => {
+      setPrefersDarkMode(e.matches);
+      
+      // Unregister old plugin and register new one with updated dark mode
+      ChartJS.unregister(logoPluginInstance);
+      const updatedLogoPlugin = createLogoPlugin(e.matches);
+      ChartJS.register(updatedLogoPlugin);
+      
+      // Force chart update if we have a reference
+      if (chartRef.current) {
+        chartRef.current.update();
+      }
+    };
+    
+    darkModeQuery.addEventListener('change', darkModeListener);
+    
+    // Clean up
+    return () => {
+      darkModeQuery.removeEventListener('change', darkModeListener);
+      ChartJS.unregister(logoPluginInstance);
+    };
+  }, []);
+  
   const options: ChartOptions<'scatter'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -226,31 +275,41 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
       x: {
         title: {
           display: true,
-          text: 'Code Level (0 = No Code, 1 = Advanced Coding)',
-          padding: {top: 10, bottom: 10}
+          text: 'Code Level',
+          padding: {top: 5, bottom: 5},
+          color: prefersDarkMode ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)'
         },
         min: 0,
         max: 1,
+        ticks: {
+          color: prefersDarkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
+        },
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)'
+          color: prefersDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
         }
       },
       y: {
         title: {
           display: true,
-          text: 'Complexity (0 = Simple, 1 = Complex)',
-          padding: {top: 10, bottom: 10}
+          text: 'Complexity',
+          padding: {top: 5, bottom: 5},
+          color: prefersDarkMode ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)'
         },
         min: 0,
         max: 1,
+        ticks: {
+          color: prefersDarkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
+        },
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)'
+          color: prefersDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
         }
       }
     },
     plugins: {
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: prefersDarkMode ? 'rgba(50, 50, 50, 0.9)' : 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#ffffff',
+        bodyColor: 'rgba(255, 255, 255, 0.8)',
         titleFont: {
           size: 14,
           weight: 'bold'
@@ -258,7 +317,8 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
         bodyFont: {
           size: 13
         },
-        padding: 10,
+        cornerRadius: 6,
+        padding: 8,
         callbacks: {
           label: (context) => {
             const data = context.raw as any;
@@ -267,6 +327,7 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
             const complexity = data.originalY !== undefined ? data.originalY : data.y;
             return [
               `${data.name}`,
+              `Type: ${data.category}`,
               `Code Level: ${codeLevel.toFixed(1)}`,
               `Complexity: ${complexity.toFixed(1)}`,
               `${data.description}`
@@ -276,10 +337,17 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
       },
       legend: {
         position: 'top',
+        align: 'start',
         labels: {
-          padding: 20,
+          color: prefersDarkMode ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
+          padding: 15,
           usePointStyle: true,
-          pointStyle: 'circle'
+          pointStyle: 'circle',
+          boxWidth: 8,
+          boxHeight: 8,
+          font: {
+            size: 11
+          }
         }
       },
       zoom: {
@@ -337,12 +405,13 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
 
   return (
     <div className="w-full h-full">
-      <div className="absolute top-20 right-4 z-10">
+      <div className="absolute top-14 right-4 z-10">
         <button 
           onClick={resetZoom}
-          className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded-md transition-colors shadow-md"
+          className="px-2.5 py-1 text-xs font-medium bg-secondary text-secondary-foreground hover:bg-muted rounded transition-colors shadow-md border border-border"
+          title="Reset zoom level"
         >
-          Reset Zoom
+          Reset View
         </button>
       </div>
       <div className="w-full h-full">
