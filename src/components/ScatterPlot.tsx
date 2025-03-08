@@ -579,29 +579,30 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
   
   return (
     <div className="w-full h-full">
-      {/* Control panel */}
-      <div className="absolute top-14 left-4 z-10 flex flex-col gap-2">
-        <div className="bg-card rounded shadow-md p-3 border border-border max-w-64">
-          <h3 className="text-sm font-medium mb-2">Axis Settings</h3>
-          <div className="flex flex-col gap-2">
-            <div>
-              <label className="text-xs text-muted-foreground block mb-1">X-Axis</label>
+      {/* Control panel - fixed at top, more horizontal layout */}
+      <div className="absolute top-14 left-0 right-0 z-10 flex justify-center">
+        <div className="flex flex-wrap gap-2 p-2 mx-2 bg-card/80 backdrop-blur-sm rounded-md shadow-md border border-border/50">
+          {/* Axis controls */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs font-medium whitespace-nowrap">X:</label>
               <select 
                 value={xAxisMetric.key}
                 onChange={handleXAxisChange}
-                className="w-full text-xs p-1.5 rounded border border-border bg-input text-foreground"
+                className="text-xs p-1 min-w-32 rounded border border-border bg-card text-foreground"
               >
                 {availableMetrics.map(metric => (
                   <option key={`x-${metric.key}`} value={metric.key}>{metric.label}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="text-xs text-muted-foreground block mb-1">Y-Axis</label>
+            
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs font-medium whitespace-nowrap">Y:</label>
               <select 
                 value={yAxisMetric.key}
                 onChange={handleYAxisChange}
-                className="w-full text-xs p-1.5 rounded border border-border bg-input text-foreground"
+                className="text-xs p-1 min-w-32 rounded border border-border bg-card text-foreground"
               >
                 {availableMetrics.map(metric => (
                   <option key={`y-${metric.key}`} value={metric.key}>{metric.label}</option>
@@ -609,103 +610,147 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
               </select>
             </div>
           </div>
+          
+          <div className="h-6 mx-1 w-px bg-border/50"></div>
+          
+          {/* Filter toggle */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-1 bg-secondary text-secondary-foreground hover:bg-muted px-2 py-1 text-xs rounded transition-colors border ${showFilters ? 'border-primary' : 'border-border/50'}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            <span>Filters {showFilters ? '(On)' : ''}</span>
+          </button>
+          
+          <div className="h-6 mx-1 w-px bg-border/50"></div>
+          
+          {/* Reset zoom button */}
+          <button 
+            onClick={resetZoom}
+            className="flex items-center gap-1 bg-secondary text-secondary-foreground hover:bg-muted px-2 py-1 text-xs rounded transition-colors border border-border/50"
+            title="Reset zoom level"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/>
+              <path d="M3 12h18"/>
+              <path d="M12 3v18"/>
+            </svg>
+            <span>Reset View</span>
+          </button>
         </div>
-        
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="bg-secondary text-secondary-foreground hover:bg-muted px-3 py-1.5 text-xs rounded shadow-md border border-border"
-        >
-          {showFilters ? 'Hide Filters' : 'Show Filters'}
-        </button>
-        
-        {showFilters && (
-          <div className="bg-card rounded shadow-md p-3 border border-border max-w-64">
-            <h3 className="text-sm font-medium mb-2">Filters</h3>
-            
-            <div className="mb-3">
-              <label className="text-xs text-muted-foreground block mb-1">Categories</label>
-              <div className="flex flex-wrap gap-1">
-                {uniqueCategories.map(category => (
+      </div>
+      
+      {/* Filters panel - slides down when active */}
+      {showFilters && (
+        <div className="absolute top-28 left-0 right-0 z-10 flex justify-center">
+          <div className="mx-2 p-3 bg-card rounded-md shadow-md border border-border/50 max-w-4xl w-full animate-in slide-in-from-top duration-300">
+            <div className="flex flex-wrap gap-5">
+              {/* Categories */}
+              <div className="min-w-56">
+                <label className="text-xs font-medium block mb-1.5">Categories</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {uniqueCategories.map(category => (
+                    <button
+                      key={category}
+                      onClick={() => handleCategoryToggle(category)}
+                      className={`text-xs px-2 py-0.5 rounded-full ${
+                        categoryFilter.includes(category)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-secondary text-secondary-foreground hover:bg-muted'
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* UI Filter */}
+              <div>
+                <label className="text-xs font-medium block mb-1.5">User Interface</label>
+                <div className="flex gap-2">
                   <button
-                    key={category}
-                    onClick={() => handleCategoryToggle(category)}
-                    className={`text-xs px-2 py-0.5 rounded-full ${
-                      categoryFilter.includes(category)
+                    onClick={() => setHasUIFilter(hasUIFilter === true ? null : true)}
+                    className={`text-xs px-2 py-0.5 rounded-md ${
+                      hasUIFilter === true
                         ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground'
-                    }`}
+                        : 'bg-secondary text-secondary-foreground hover:bg-muted'
+                    } flex items-center gap-1`}
                   >
-                    {category}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect width="18" height="18" x="3" y="3" rx="2" />
+                      <path d="M7 7h10v2H7z" />
+                      <path d="M7 13h6m-6 4h10" stroke={hasUIFilter === true ? 'currentColor' : 'currentColor'} />
+                    </svg>
+                    <span>Has UI</span>
                   </button>
-                ))}
+                  <button
+                    onClick={() => setHasUIFilter(hasUIFilter === false ? null : false)}
+                    className={`text-xs px-2 py-0.5 rounded-md ${
+                      hasUIFilter === false
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground hover:bg-muted'
+                    } flex items-center gap-1`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18.36 6.64A9 9 0 0 1 20.77 15"></path>
+                      <path d="M6.16 6.16a9 9 0 1 0 12.68 12.68"></path>
+                      <path d="M12 2v4"></path>
+                      <path d="m2 2 20 20"></path>
+                    </svg>
+                    <span>No UI</span>
+                  </button>
+                </div>
               </div>
-            </div>
-            
-            <div className="mb-3">
-              <label className="text-xs text-muted-foreground block mb-1">User Interface</label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setHasUIFilter(hasUIFilter === true ? null : true)}
-                  className={`text-xs px-2 py-0.5 rounded ${
-                    hasUIFilter === true
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-secondary-foreground'
-                  }`}
-                >
-                  Has UI
-                </button>
-                <button
-                  onClick={() => setHasUIFilter(hasUIFilter === false ? null : false)}
-                  className={`text-xs px-2 py-0.5 rounded ${
-                    hasUIFilter === false
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-secondary-foreground'
-                  }`}
-                >
-                  No UI
-                </button>
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-xs text-muted-foreground block mb-1">
-                Learning Curve: {minLearningCurve.toFixed(1)} - {maxLearningCurve.toFixed(1)}
-              </label>
-              <div className="flex items-center gap-2 px-1">
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={minLearningCurve}
-                  onChange={(e) => setMinLearningCurve(parseFloat(e.target.value))}
-                  className="w-full"
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={maxLearningCurve}
-                  onChange={(e) => setMaxLearningCurve(parseFloat(e.target.value))}
-                  className="w-full"
-                />
+              
+              {/* Learning Curve Range */}
+              <div className="flex-grow min-w-40 max-w-96">
+                <label className="text-xs font-medium block mb-1.5">
+                  Learning Curve: <span className="text-primary">{minLearningCurve.toFixed(1)} - {maxLearningCurve.toFixed(1)}</span>
+                  <span className="text-muted-foreground ml-1.5 text-[9px]">(0 = Easy to Learn, 1 = Difficult)</span>
+                </label>
+                <div className="flex flex-col gap-2 px-2 pt-1 pb-2">
+                  <div className="relative h-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="h-[2px] w-full bg-border"></div>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={minLearningCurve}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        if (val <= maxLearningCurve) setMinLearningCurve(val);
+                      }}
+                      className="absolute w-full h-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
+                    />
+                    <input
+                      type="range" 
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={maxLearningCurve}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        if (val >= minLearningCurve) setMaxLearningCurve(val);
+                      }}
+                      className="absolute w-full h-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
+                    />
+                  </div>
+                  <div className="flex justify-between text-[9px] text-muted-foreground">
+                    <span>Beginner-friendly</span>
+                    <span>Expert-focused</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        )}
-      </div>
-      
-      {/* Reset zoom button */}
-      <div className="absolute top-14 right-4 z-10">
-        <button 
-          onClick={resetZoom}
-          className="px-2.5 py-1 text-xs font-medium bg-secondary text-secondary-foreground hover:bg-muted rounded transition-colors shadow-md border border-border"
-          title="Reset zoom level"
-        >
-          Reset View
-        </button>
-      </div>
+        </div>
+      )}
       
       {/* Chart area */}
       <div className="w-full h-full">
