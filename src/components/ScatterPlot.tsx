@@ -207,7 +207,7 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
               originalY: framework.complexity
             };
           }),
-          backgroundColor: 'rgba(100, 100, 255, 0.5)',
+          backgroundColor: 'transparent', // Using transparent since we're rendering our own circles
           pointRadius: 18, // Slightly larger to make logos more visible
           pointHoverRadius: 22,
           pointStyle: 'circle',
