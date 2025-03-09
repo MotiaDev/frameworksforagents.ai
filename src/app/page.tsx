@@ -29,6 +29,12 @@ export default function Home() {
     loadData();
   }, []);
 
+  // Reset all filters and search
+  const resetAllFilters = () => {
+    setSearchQuery('');
+    setFilteredFrameworks(frameworks);
+  };
+
   useEffect(() => {
     // Apply filters
     let filtered = [...frameworks];
@@ -66,13 +72,14 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center p-0">
       {/* Fixed top navigation bar - always dark */}
       <div className="w-full bg-card shadow-md fixed top-0 z-10 px-4 py-2">
-        <div className="container mx-auto flex flex-row items-center justify-between gap-3">
+        <div className="w-full flex flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-4">
+            {/* Title and Built by Motia on the left */}
             <h1 className="text-xl font-bold text-foreground shrink-0">AI Agent Landscape</h1>
 
             {/* Built by Motia */}
-            <div className="hidden sm:flex items-center gap-2 border-l border-border/50 pl-4">
-              <span className="text-xs text-muted-foreground">Built by</span>
+            <div className="flex items-center gap-2 border-l border-border/50 pl-4">
+              <span className="text-xs text-muted-foreground">Powered by</span>
               <a
                 href="https://motia.dev"
                 target="_blank"
@@ -82,13 +89,19 @@ export default function Home() {
                 <img
                   src="/motia-logo-white.png"
                   alt="Motia"
-                  className="h-6"
+                  className="h-6 hidden sm:block"
+                />
+                <img
+                  src="/motia-icon-white.png"
+                  alt="Motia"
+                  className="h-5 sm:hidden"
                 />
               </a>
             </div>
           </div>
 
-          <div className="flex flex-row items-center gap-2">
+          {/* Search box on the far right */}
+          <div className="flex items-center">
             <div className="w-48 sm:w-64">
               <input
                 type="text"
@@ -104,7 +117,7 @@ export default function Home() {
 
       {/* Full-screen chart area - increased top padding to accommodate controls */}
       <div className="w-full h-screen pt-24">
-        <ScatterPlot frameworks={filteredFrameworks} />
+        <ScatterPlot frameworks={filteredFrameworks} onResetAllFilters={resetAllFilters} />
       </div>
 
       {/* Mobile "Built by" footer */}

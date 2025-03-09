@@ -167,9 +167,10 @@ export const availableMetrics: AxisMetric[] = [
 
 interface ScatterPlotProps {
   frameworks: AgentFramework[];
+  onResetAllFilters?: () => void;
 }
 
-export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
+export default function ScatterPlot({ frameworks, onResetAllFilters }: ScatterPlotProps) {
   const [chartData, setChartData] = useState<any>(null);
   const [selectedFramework, setSelectedFramework] = useState<AgentFramework | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -511,8 +512,51 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
   };
 
   const resetZoom = () => {
-    if (chartRef.current) {
-      chartRef.current.resetZoom();
+    try {
+      console.log("Resetting zoom...");
+      if (chartRef.current) {
+        // Access the underlying Chart.js instance
+        const chartInstance = chartRef.current.chartInstance;
+        
+        if (chartInstance) {
+          console.log("Using chartInstance.resetZoom()");
+          chartInstance.resetZoom();
+        } else if (typeof chartRef.current.resetZoom === 'function') {
+          console.log("Using chartRef.current.resetZoom()");
+          chartRef.current.resetZoom();
+        } else if (chartRef.current.getChart && typeof chartRef.current.getChart().resetZoom === 'function') {
+          console.log("Using getChart().resetZoom()");
+          chartRef.current.getChart().resetZoom();
+        } else {
+          console.log("Cannot find resetZoom method");
+          // Fallback to manually resetting scales
+          const chart = chartRef.current;
+          if (chart.scales && chart.scales.x && chart.scales.y) {
+            console.log("Manually resetting scales");
+            chart.scales.x.min = 0;
+            chart.scales.x.max = 1;
+            chart.scales.y.min = 0;
+            chart.scales.y.max = 1;
+            chart.update();
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error resetting zoom:", error);
+    }
+  };
+  
+  // Function to reset all filters including search from parent
+  const resetAllFilters = () => {
+    // Reset internal filters
+    setCategoryFilter([]);
+    setHasUIFilter(null);
+    setMinLearningCurve(0);
+    setMaxLearningCurve(1);
+    
+    // Call parent's reset function to clear search if provided
+    if (onResetAllFilters) {
+      onResetAllFilters();
     }
   };
 
@@ -589,11 +633,11 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
           
           <div className="h-6 mx-1 w-px bg-border/50"></div>
           
-          {/* Reset zoom button */}
+          {/* Reset button - using window.location.reload as a foolproof method */}
           <button 
-            onClick={resetZoom}
+            onClick={() => window.location.reload()}
             className="flex items-center gap-1 bg-secondary text-secondary-foreground hover:bg-muted px-2 py-1 text-xs rounded transition-colors border border-border/50"
-            title="Reset zoom level"
+            title="Reset view by reloading the page"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/>
@@ -609,6 +653,21 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
       {showFilters && (
         <div className="absolute top-28 left-0 right-0 z-10 flex justify-center">
           <div className="mx-2 p-3 bg-card rounded-md shadow-md border border-border/50 max-w-4xl w-full animate-in slide-in-from-top duration-300">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-sm font-medium">Filter Frameworks</h3>
+              <button
+                onClick={resetAllFilters}
+                className="text-xs px-2 py-1 rounded bg-muted hover:bg-muted/80 text-muted-foreground flex items-center gap-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/>
+                  <path d="M19 12H5"/>
+                  <path d="m12 19-4-4 4-4"/>
+                </svg>
+                <span>Reset All Filters</span>
+              </button>
+            </div>
+            
             <div className="flex flex-wrap gap-5">
               {/* Categories */}
               <div className="min-w-56">
