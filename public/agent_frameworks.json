@@ -8,7 +8,7 @@
     "docs_url": "https://python.langchain.com/docs/introduction/",
     "community_url": "https://discord.gg/6adMQxSpJS",
     "license": "MIT",
-    "logo_url": "https://www.langchain.com/assets/images/langchain_logo.svg",
+    "logo_url": "https://avatars.githubusercontent.com/u/126733545?s=48&v=4",
     "programming_language": [
       "Python",
       "JavaScript"
@@ -44,7 +44,7 @@
     "docs_url": "https://docs.llamaindex.ai/",
     "community_url": "https://discord.gg/dGcwcsnxhU",
     "license": "MIT",
-    "logo_url": "https://www.llamaindex.ai/assets/images/llama_logo.svg",
+    "logo_url": "https://avatars.githubusercontent.com/u/130722866?s=48&v=4",
     "programming_language": [
       "Python",
       "TypeScript"
@@ -81,7 +81,7 @@
     "docs_url": "https://docs.agpt.co/",
     "community_url": "https://discord.gg/autogpt",
     "license": "MIT",
-    "logo_url": "https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/frontend/public/icons/icon-192x192.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/130738209?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -117,7 +117,7 @@
     "docs_url": "https://www.crewai.com/docs",
     "community_url": "https://discord.gg/crewai",
     "license": "MIT",
-    "logo_url": "https://www.crewai.com/assets/images/crewai_logo.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/170677839?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -156,7 +156,7 @@
     "docs_url": "https://superagi.com/docs/",
     "community_url": "https://discord.gg/superagi",
     "license": "MIT",
-    "logo_url": "https://superagi.com/wp-content/uploads/2023/05/SuperAGI_icon.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/133493246?s=48&v=4",
     "programming_language": [
       "Python",
       "JavaScript"
@@ -192,7 +192,7 @@
     "complexity_justification": "Straightforward task management system with basic LLM integration.",
     "description": "Simple task management system using LLMs",
     "url": "https://github.com/yoheinakajima/babyagi",
-    "logo_url": "https://user-images.githubusercontent.com/334530/232942559-f144a686-67c2-4abf-8671-8bbf2f9ef0f1.png"
+    "logo_url": "https://avatars.githubusercontent.com/u/1701418?s=48&v=4"
   },
   {
     "name": "AgentGPT",
@@ -203,7 +203,7 @@
     "docs_url": "https://agentgpt.reworkd.ai/docs",
     "community_url": "https://discord.gg/agentgpt",
     "license": "MIT",
-    "logo_url": "https://agentgpt.reworkd.ai/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/120154269?s=48&v=4",
     "programming_language": [
       "JavaScript",
       "TypeScript"
@@ -239,7 +239,7 @@
     "docs_url": "https://docs.haystack.deepset.ai/",
     "community_url": "https://discord.com/invite/VBpFzsgRVF",
     "license": "Apache-2.0",
-    "logo_url": "https://assets-global.website-files.com/627a5ba8c43e012849d45322/64a543154a8df714eb86a365_haystack.svg",
+    "logo_url": "https://avatars.githubusercontent.com/u/51827949?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -274,7 +274,7 @@
     "docs_url": "https://docs.langflow.org/",
     "community_url": "https://discord.gg/langflow",
     "license": "MIT",
-    "logo_url": "https://www.langflow.org/logo-dark.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/85702467?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -309,7 +309,7 @@
     "docs_url": "https://docs.flowiseai.com/",
     "community_url": "https://discord.gg/flowise",
     "license": "MIT",
-    "logo_url": "https://flowiseai.com/_next/static/media/flowise.e47f840e.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/128289781?s=48&v=4",
     "programming_language": [
       "JavaScript",
       "TypeScript"
@@ -346,7 +346,7 @@
     "docs_url": "https://breadboard-ai.github.io/breadboard/docs/",
     "community_url": "https://discord.gg/breadboard",
     "license": "Apache-2.0",
-    "logo_url": "https://breadboard-ai.github.io/breadboard/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/147835160?s=48&v=4",
     "programming_language": [
       "JavaScript",
       "TypeScript"
@@ -382,7 +382,7 @@
     "docs_url": "https://fixie.ai/docs",
     "community_url": "https://discord.gg/fixie",
     "license": "MIT",
-    "logo_url": "https://assets-global.website-files.com/62a1d5c98e8e63abcb5e64fc/65af29d9e4c9e4fe33a61acd_fixie_icon_dark.svg",
+    "logo_url": "https://avatars.githubusercontent.com/u/104391453?s=200&v=4",
     "programming_language": [
       "JavaScript",
       "TypeScript",
@@ -421,7 +421,7 @@
     "docs_url": "https://learn.microsoft.com/en-us/semantic-kernel/overview/",
     "community_url": "https://discord.gg/semantic-kernel",
     "license": "MIT",
-    "logo_url": "https://raw.githubusercontent.com/microsoft/semantic-kernel/main/docs/website/static/img/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/6154722?s=48&v=4",
     "programming_language": [
       "C#",
       "Python",
@@ -459,7 +459,7 @@
     "docs_url": "https://platform.openai.com/docs/assistants/overview",
     "community_url": "https://community.openai.com/",
     "license": "Proprietary",
-    "logo_url": "https://openai.com/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/14957082?s=48&v=4",
     "programming_language": [
       "Python",
       "JavaScript",
@@ -497,7 +497,7 @@
     "docs_url": "https://docs.anthropic.com/en/docs/intro",
     "community_url": "https://discord.gg/anthropic",
     "license": "Proprietary",
-    "logo_url": "https://www.anthropic.com/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/76263028?s=200&v=4",
     "programming_language": [
       "Python",
       "JavaScript",
@@ -535,7 +535,7 @@
     "docs_url": "https://gorilla.cs.berkeley.edu/#resources",
     "community_url": "https://discord.gg/SwTyuTAxX3",
     "license": "Apache-2.0",
-    "logo_url": "https://gorilla.cs.berkeley.edu/assets/img/gorilla_v2.svg",
+    "logo_url": "https://github.com/ShishirPatil/gorilla/raw/gh-pages/assets/img/logo.png",
     "programming_language": [
       "Python",
       "Java",
@@ -603,45 +603,6 @@
     "observability_justification": "Provides execution logs and workflow monitoring within the UI, but lacks advanced observability tools like real-time analytics or deep tracing."
   },
   {
-    "name": "Airplane",
-    "category": "Orchestration",
-    "description": "Developer-centric platform for building internal tools and workflows, transforming scripts and APIs into secure, reusable applications.",
-    "website_url": "https://www.airplane.dev/",
-    "github_url": "https://github.com/airplanedev",
-    "docs_url": "https://docs.airplane.dev/",
-    "community_url": "https://discord.gg/airplane",
-    "license": "Proprietary",
-    "logo_url": "https://www.airplane.dev/favicon.ico",
-    "programming_language": [
-      "JavaScript",
-      "Python",
-      "SQL",
-      "Shell"
-    ],
-    "programming_language_support": 0.9,
-    "communication_protocols": [
-      "HTTP requests",
-      "Webhooks",
-      "REST API"
-    ],
-    "code_level": 0.8,
-    "code_level_justification": "Developer-focused platform requiring significant coding in JavaScript, Python, SQL, or Shell to create custom tools and workflows.",
-    "complexity": 0.7,
-    "complexity_justification": "Building internal tools and workflows demands a high level of technical expertise, despite streamlined UI and automation features.",
-    "user_interface_availability": true,
-    "scalability": 0.9,
-    "scalability_justification": "Designed for scalable internal workflows with cloud and self-hosted options, though not optimized for massive enterprise scale.",
-    "integration_score": 1.0,
-    "integration_score_justification": "Seamlessly integrates with databases, APIs, messaging platforms, and LLM tools, supporting a wide range of use cases.",
-    "learning_curve": 0.7,
-    "learning_curve_justification": "Requires solid coding skills and understanding of workflow automation, though documentation and templates ease adoption.",
-    "update_frequency_and_maintenance": false,
-    "deployment_platform": "Supports cloud-hosted (Airplane Cloud) and self-hosted deployment via AWS agents.",
-    "use_cases_and_applications": "Suitable for building admin panels, customer onboarding flows, database migrations, on-call runbooks, and AI-augmented internal tools.",
-    "observability": 0.7,
-    "observability_justification": "Offers execution logs, audit trails, and activity monitoring within the UI, but lacks advanced real-time analytics or tracing."
-  },
-  {
     "name": "Zapier",
     "category": "Orchestration",
     "description": "No-code automation platform with AI features for connecting apps, automating workflows, and enhancing productivity.",
@@ -687,7 +648,7 @@
     "docs_url": "https://www.make.com/en/help",
     "community_url": "https://community.make.com/",
     "license": "Proprietary",
-    "logo_url": "https://www.make.com/_nuxt/icons/icon_512x512.7de549.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/8357502?s=200&v=4",
     "programming_language": [
       "None (No-code)",
       "JavaScript (Optional for custom functions)"
@@ -724,7 +685,7 @@
     "docs_url": "https://docs.activeloop.ai/",
     "community_url": "https://discord.gg/deeplake",
     "license": "Apache-2.0",
-    "logo_url": "https://www.activeloop.ai/favicon-32x32.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/34816118?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -760,7 +721,7 @@
     "docs_url": "https://microsoft.github.io/autogen/docs/Getting-Started",
     "community_url": "https://github.com/microsoft/autogen/discussions",
     "license": "MIT",
-    "logo_url": "https://microsoft.github.io/autogen/img/autogen_logo.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/6154722?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -796,7 +757,7 @@
     "docs_url": "https://docs.parea.ai/",
     "community_url": "https://discord.gg/YDcMXxZ8Kd",
     "license": "MIT",
-    "logo_url": "https://global-uploads.webflow.com/649ece3e37c2f0aec0bc6354/6525ebe12f7a44321a98d019_webclip.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/135163833?s=200&v=4",
     "programming_language": [
       "Python",
       "TypeScript"
@@ -833,7 +794,7 @@
     "docs_url": "https://dspy.ai/docs/intro",
     "community_url": "https://discord.gg/pbeEyxKaT6",
     "license": "Apache-2.0",
-    "logo_url": "https://raw.githubusercontent.com/stanfordnlp/dspy/main/docs/images/dspy_logo.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/3046006?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -868,7 +829,7 @@
     "docs_url": "https://motia.dev/docs",
     "community_url": "https://discord.gg/nJFfsH5d6v",
     "license": "MIT",
-    "logo_url": "https://motia.dev/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/193029780?s=200&v=4",
     "programming_language": [
       "JavaScript",
       "TypeScript",
@@ -916,7 +877,7 @@
     "docs_url": "https://docs.gumloop.com",
     "community_url": "https://discord.gg/gumloop",
     "license": "Proprietary",
-    "logo_url": "https://gumloop.com/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/171099481?s=200&v=4",
     "programming_language": [
       "JavaScript",
       "Python"
@@ -953,7 +914,7 @@
     "docs_url": "https://docs.embedchain.ai/",
     "community_url": "https://discord.gg/6PzXDgEjG5",
     "license": "Apache-2.0",
-    "logo_url": "https://raw.githubusercontent.com/embedchain/embedchain/main/assets/rag_logo.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/108304503?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -989,7 +950,7 @@
     "docs_url": "https://docs.steamship.com/",
     "community_url": "https://discord.gg/steamship",
     "license": "MIT",
-    "logo_url": "https://www.steamship.com/favicon.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/99272373?s=200&v=4",
     "programming_language": [
       "Python"
     ],
@@ -1025,7 +986,7 @@
     "docs_url": "https://docs.litellm.ai/docs/",
     "community_url": "https://discord.gg/wuPM9dRgDw",
     "license": "MIT",
-    "logo_url": "https://litellm.ai/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/121462774?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -1061,7 +1022,7 @@
     "docs_url": "https://docs.mindsdb.com/",
     "community_url": "https://community.mindsdb.com/",
     "license": "GPL-3.0",
-    "logo_url": "https://mindsdb.com/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/31035808?s=200&v=4",
     "programming_language": [
       "SQL",
       "Python"
@@ -1098,7 +1059,7 @@
     "docs_url": "https://docs.instructlab.ai/",
     "community_url": "https://discord.gg/instructlab",
     "license": "Apache-2.0",
-    "logo_url": "https://raw.githubusercontent.com/instructlab/instructlab/main/docs/source/_static/instructlab-logo.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/160199024?s=200&v=4",
     "programming_language": [
       "Python"
     ],
@@ -1134,7 +1095,7 @@
     "docs_url": "https://docs.e2b.dev/",
     "community_url": "https://discord.gg/U7KEcGErtQ",
     "license": "MIT",
-    "logo_url": "https://e2b.dev/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/129434473?s=48&v=4",
     "programming_language": [
       "JavaScript",
       "TypeScript",
@@ -1208,7 +1169,7 @@
     "docs_url": "https://docs.h2o.ai/",
     "community_url": "https://h2o.ai/community/",
     "license": "Commercial with Open Source Components",
-    "logo_url": "https://h2o.ai/content/experience-fragments/h2o/us/en/site/header/master/_jcr_content/root/container/header_copy/logo.coreimg.svg/1697135997023/h2o-ai-logo.svg",
+    "logo_url": "https://avatars.githubusercontent.com/u/1402695?s=200&v=4",
     "programming_language": [
       "Python",
       "R",
@@ -1247,7 +1208,7 @@
     "docs_url": "https://docs.determined.ai/",
     "community_url": "https://join.slack.com/t/determined-community/shared_invite/zt-1g7nv5i7g-PJ1cj1~CnrR0EUE7dKpIg",
     "license": "Apache-2.0",
-    "logo_url": "https://determined.ai/icons/icon-512x512.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/26636771?s=200&v=4",
     "programming_language": [
       "Python"
     ],
@@ -1283,7 +1244,7 @@
     "docs_url": "https://docs.databricks.com/",
     "community_url": "https://community.databricks.com/",
     "license": "Commercial with Open Source Components",
-    "logo_url": "https://www.databricks.com/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/4998052?s=200&v=4",
     "programming_language": [
       "Python",
       "SQL",
@@ -1323,7 +1284,7 @@
     "docs_url": "https://github.com/ianarawjo/chainforge/wiki",
     "community_url": "https://github.com/ianarawjo/chainforge/discussions",
     "license": "MIT",
-    "logo_url": "https://raw.githubusercontent.com/ianarawjo/ChainForge/main/resources/images/ChainForge.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/5251713?s=48&v=4",
     "programming_language": [
       "Python",
       "JavaScript"
@@ -1360,7 +1321,7 @@
     "docs_url": "https://docs.humanloop.com/",
     "community_url": "https://join.slack.com/t/humanloop-community/shared_invite/zt-q9e9k85y-EIl1qqFrXCqBFfIj1vF28A",
     "license": "Commercial",
-    "logo_url": "https://humanloop.com/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/62994890?s=200&v=4",
     "programming_language": [
       "Python",
       "JavaScript",
@@ -1399,7 +1360,7 @@
     "docs_url": "https://docs.lmql.ai/",
     "community_url": "https://discord.gg/7eJP4fcyNX",
     "license": "MIT",
-    "logo_url": "https://lmql.ai/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/5363413?s=48&v=4",
     "programming_language": [
       "Python",
       "LMQL"
@@ -1430,24 +1391,13 @@
   {
     "name": "Instructor",
     "category": "Agent Framework",
-    "code_level": 0.7,
-    "code_level_justification": "Requires Python coding and understanding of structured extraction concepts.",
-    "complexity": 0.6,
-    "complexity_justification": "Library simplifies extraction tasks but requires solid coding skills.",
-    "description": "Library for structured data extraction from LLMs",
-    "url": "https://github.com/jxnl/instructor",
-    "logo_url": "https://instructor-ai.github.io/instructor/img/instructor.png"
-  },
-  {
-    "name": "Instructor",
-    "category": "Agent Framework",
     "description": "Library for structured data extraction from LLMs",
     "website_url": "https://instructor-ai.github.io/instructor/",
     "github_url": "https://github.com/jxnl/instructor",
     "docs_url": "https://instructor-ai.github.io/instructor/",
     "community_url": "https://discord.gg/CV8sPM5k5Y",
     "license": "MIT",
-    "logo_url": "https://instructor-ai.github.io/instructor/img/instructor.png",
+    "logo_url": "https://avatars.githubusercontent.com/u/155852026?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -1482,7 +1432,7 @@
     "docs_url": "https://guidance.readthedocs.io/en/latest/",
     "community_url": "https://github.com/guidance-ai/guidance/discussions",
     "license": "MIT",
-    "logo_url": "https://raw.githubusercontent.com/guidance-ai/guidance/main/docs/guidance_logo.svg",
+    "logo_url": "https://avatars.githubusercontent.com/u/142035062?s=48&v=4",
     "programming_language": [
       "Python"
     ],
@@ -1516,7 +1466,7 @@
     "docs_url": "https://docs.portkey.ai/",
     "community_url": "https://join.slack.com/t/portkey-ai/shared_invite/zt-1zbh5iwn5-F55Oa~rcbK7vA1_dl0xOqQ",
     "license": "MIT",
-    "logo_url": "https://portkey.ai/favicon.ico",
+    "logo_url": "https://avatars.githubusercontent.com/u/131141116?s=48&v=4",
     "programming_language": [
       "JavaScript",
       "TypeScript",
