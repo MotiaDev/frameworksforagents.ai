@@ -668,7 +668,7 @@
     "scalability_justification": "Cloud-based platform designed for high scalability, handling complex automations across numerous users and apps.",
     "integration_score": 1.0,
     "integration_score_justification": "Connects with thousands of apps and services via pre-built modules, HTTP requests, and custom app creation, offering extensive versatility.",
-    "learning_curve": 0.3,
+    "learning_curve": 0.8,
     "learning_curve_justification": "Low to moderate; visual interface is intuitive, but mastering advanced features and logic requires some effort.",
     "update_frequency_and_maintenance": true,
     "deployment_platform": "Cloud-hosted by Make; no self-hosting option.",
@@ -854,7 +854,7 @@
     "scalability_justification": "Event-driven architecture designed for high scalability across distributed systems.",
     "integration_score": 1.0,
     "integration_score_justification": "Supports multiple programming languages and standard communication protocols for seamless integration with various systems.",
-    "learning_curve": 0.5,
+    "learning_curve": 0.4,
     "learning_curve_justification": "Balanced between powerful features and developer-friendly APIs with good documentation.",
     "update_frequency_and_maintenance": true,
     "deployment_platform": "Coming Soon",
@@ -1348,7 +1348,7 @@
     "update_frequency_and_maintenance": true,
     "deployment_platform": "Cloud-hosted SaaS with API access for integration into existing workflows.",
     "use_cases_and_applications": "Prompt engineering, LLM application development, evaluation frameworks, A/B testing, and production monitoring.",
-    "observability": 0.9,
+    "observability": 0.8,
     "observability_justification": "Comprehensive analytics, logging, and monitoring tools for tracking LLM performance and user feedback."
   },
   {
