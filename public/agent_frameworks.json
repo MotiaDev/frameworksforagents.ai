@@ -899,7 +899,13 @@
     "deployment_platform": "Coming Soon",
     "use_cases_and_applications": "Suitable for building AI agents, backend automation, and event-driven workflows.",
     "observability": 0.9,
-    "observability_justification": "Ability to deeply inspect each step of an agent or intelligent workflow."
+    "observability_justification": "Ability to deeply inspect each step of an agent or intelligent workflow.",
+    "flixability_score": "",
+    "flixability_score_justificton": "",
+    "evals_score": "",
+    "evals_score_justification": "",
+    "low_level_agent_control_score": "",
+    "low_level_agent_control_score_justification": ""
   },
   {
     "name": "Gumloop",

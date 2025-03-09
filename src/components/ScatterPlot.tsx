@@ -32,9 +32,9 @@ const createSVGInitials = (name: string): string => {
   const colorIndex = nameHash % colors.length;
   const initialsColor = colors[colorIndex];
   
-  return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-    <circle cx="16" cy="16" r="16" fill="white" />
-    <text x="16" y="22" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="${initialsColor}">${initials}</text>
+  return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 68 68">
+    <circle cx="34" cy="34" r="34" fill="white" />
+    <text x="34" y="44" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="${initialsColor}">${initials}</text>
   </svg>`;
 };
 
@@ -50,7 +50,7 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
         const point = meta.data[index];
         
         if (point && point.x !== undefined && point.y !== undefined) {
-          const size = 32; // Keep this consistent with hit detection radius (16px radius = 32px diameter)
+          const size = 68; // Significantly increased icon size for better visibility
           const x = point.x - size / 2;
           const y = point.y - size / 2;
           
@@ -73,14 +73,14 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
           // Draw colored border with subtle glow - unique color per framework
           ctx.beginPath();
           ctx.arc(point.x, point.y, size / 2, 0, 2 * Math.PI);
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 3; // Increased from 2 to 3 for better visibility
           ctx.strokeStyle = borderColor;
           ctx.stroke();
           
           // Add subtle outer glow
           ctx.beginPath();
-          ctx.arc(point.x, point.y, size / 2 + 2, 0, 2 * Math.PI);
-          ctx.lineWidth = 1;
+          ctx.arc(point.x, point.y, size / 2 + 3, 0, 2 * Math.PI); // Increased from +2 to +3
+          ctx.lineWidth = 1.5; // Slightly thicker glow
           ctx.strokeStyle = borderColor.replace(')', ', 0.3)').replace('rgb', 'rgba');
           ctx.stroke();
           
@@ -104,7 +104,7 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
               ctx.clip();
               
               // Draw image with small margin for better appearance
-              const margin = 6;
+              const margin = 8; // Slightly increased margin for larger icons
               ctx.drawImage(logo, x + margin/2, y + margin/2, size - margin, size - margin);
               ctx.restore();
             } else {
@@ -139,9 +139,9 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
           // Add a hovering indicator that appears when point is hovered
           if (meta.controller.active && meta.controller.active.includes(point)) {
             ctx.beginPath();
-            ctx.arc(point.x, point.y, size / 2 + 5, 0, 2 * Math.PI);
-            ctx.lineWidth = 2;
-            ctx.setLineDash([3, 3]);
+            ctx.arc(point.x, point.y, size / 2 + 8, 0, 2 * Math.PI);
+            ctx.lineWidth = 3;
+            ctx.setLineDash([4, 4]);
             ctx.strokeStyle = borderColor;
             ctx.stroke();
             ctx.setLineDash([]);
@@ -319,8 +319,8 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
             };
           }),
           backgroundColor: 'transparent', // Using transparent since we're rendering our own circles
-          pointRadius: 16, // Match with the hit detection in onClick handler
-          pointHoverRadius: 16, // Keep the same as pointRadius to avoid visual confusion
+          pointRadius: 34, // Match with the hit detection radius (68px diameter ÷ 2)
+          pointHoverRadius: 34, // Keep the same as pointRadius to avoid visual confusion
           pointStyle: 'circle',
           hitRadius: 1, // Near-zero hit radius to disable Chart.js internal clustering
         }
@@ -527,11 +527,11 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
           const pointX = point.x;
           const pointY = point.y;
           
-          // Check if mouse is inside the point's circle (16px radius matches our visual size)
+          // Check if mouse is inside the point's circle
           const distance = Math.sqrt(Math.pow(mouseX - pointX, 2) + Math.pow(mouseY - pointY, 2));
           
-          // Only open if mouse is DIRECTLY on this point - using much smaller radius
-          if (distance <= 16) {
+          // Only open if mouse is DIRECTLY on this point
+          if (distance <= 34) { // Use 34 which is half of the 68px diameter
             const dataPoint = dataset.data[i];
             console.log("EXACT point clicked:", dataPoint.name, "distance:", distance);
             
