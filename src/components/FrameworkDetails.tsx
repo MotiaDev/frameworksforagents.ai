@@ -305,12 +305,9 @@ export default function FrameworkDetails({
           {/* Primary button for website */}
           {(framework.website_url || framework.url) && (
             <Button asChild 
-              className="transition-colors text-white ml-auto h-8 px-3 text-xs" 
+              className="transition-colors text-white ml-auto h-8 px-3 text-xs hover:opacity-90" 
               style={{ 
-                backgroundColor: getFrameworkColor(framework.name),
-                "&:hover": {
-                  backgroundColor: `${getFrameworkColor(framework.name)}CC`,
-                }
+                backgroundColor: getFrameworkColor(framework.name)
               }}
             >
               <a href={framework.website_url || framework.url} target="_blank" rel="noopener noreferrer" className="flex items-center">

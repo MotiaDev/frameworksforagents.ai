@@ -28,7 +28,7 @@ const createSVGInitials = (name: string): string => {
   ];
   
   // Use a hash function to consistently assign the same color to the same name
-  const nameHash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const nameHash = name.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
   const colorIndex = nameHash % colors.length;
   const initialsColor = colors[colorIndex];
   
@@ -61,7 +61,7 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
           ctx.fill();
           
           // Generate a consistent color for this framework
-          const nameHash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          const nameHash = name.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
           const colors = [
             '#4285F4', '#EA4335', '#FBBC05', '#34A853', // Google colors
             '#007BFF', '#6610F2', '#6F42C1', '#E83E8C', // Bootstrap colors
@@ -251,7 +251,7 @@ export default function ScatterPlot({ frameworks, onResetAllFilters }: ScatterPl
       
       // Use the name to create a deterministic "random" value
       // This ensures the same framework always gets the same jitter amount
-      const nameHash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const nameHash = name.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
       const pseudoRandom = (nameHash % 100) / 100; // value between 0 and 1
       return value + (pseudoRandom - 0.5) * amount;
     };
