@@ -136,16 +136,7 @@ const createLogoPlugin = (isDarkMode: boolean) => ({
             }
           }
           
-          // Add a hovering indicator that appears when point is hovered
-          if (meta.controller.active && meta.controller.active.includes(point)) {
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, size / 2 + 8, 0, 2 * Math.PI);
-            ctx.lineWidth = 3;
-            ctx.setLineDash([4, 4]);
-            ctx.strokeStyle = borderColor;
-            ctx.stroke();
-            ctx.setLineDash([]);
-          }
+          // No hover effects in the plugin - we'll handle interaction separately
         }
       });
     });
@@ -328,6 +319,11 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
     });
   }, [frameworks, xAxisMetric, yAxisMetric, categoryFilter, hasUIFilter, minLearningCurve, maxLearningCurve]);
 
+  // Simple helper to find a framework by name
+  const findFramework = (name: string) => {
+    return frameworks.find(f => f.name === name);
+  };
+  
   // Determine if we're in dark mode using state to make it reactive
   const [prefersDarkMode, setPrefersDarkMode] = useState(false);
   
@@ -343,7 +339,7 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
     // Create the logo plugin with current dark mode
     const logoPluginInstance = createLogoPlugin(isDarkMode);
     
-    // Import Chart.js - note we're not importing components here as they're already registered in ChartJSImports
+    // Import Chart.js
     import('chart.js').then(({ Chart: ChartJS }) => {
       // Register logo plugin
       ChartJS.register(logoPluginInstance);
@@ -376,12 +372,10 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
   const options: any = {
     responsive: true,
     maintainAspectRatio: false,
-    // Disable all Chart.js interaction modes to prevent clustering behavior
+    // Use direct point interaction mode
     interaction: {
-      mode: 'point', // Strict point mode - only interact with exact points
-      intersect: true, // Require direct intersection for hover/click
-      includeInvisible: false, // Ignore invisible points
-      axis: 'xy' // Require both x and y intersection
+      mode: 'point',  // Only select specific points
+      intersect: true  // Must intersect exactly with the point
     },
     scales: {
       x: {
@@ -421,6 +415,7 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
     },
     plugins: {
       tooltip: {
+        enabled: true,
         backgroundColor: prefersDarkMode ? 'rgba(50, 50, 50, 0.9)' : 'rgba(0, 0, 0, 0.8)',
         titleColor: '#ffffff',
         bodyColor: 'rgba(255, 255, 255, 0.8)',
@@ -434,36 +429,22 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
         cornerRadius: 6,
         padding: 8,
         callbacks: {
+          title: (context: any[]) => {
+            if (context.length === 0) return '';
+            return context[0].raw.name;
+          },
           label: (context: any) => {
-            const data = context.raw as any;
-            // Use original values if available, otherwise use the displayed values
+            const data = context.raw;
+            
+            // Use original values if available
             const xValue = data.originalX !== undefined ? data.originalX : data.x;
             const yValue = data.originalY !== undefined ? data.originalY : data.y;
             
-            let tooltipLines = [
-              `${data.name}`,
-              `Type: ${data.category}`,
+            return [
+              `Category: ${data.category}`,
               `${xAxisMetric.label}: ${xValue.toFixed(1)}`,
               `${yAxisMetric.label}: ${yValue.toFixed(1)}`
             ];
-            
-            // Add programming languages if available
-            if (data.programming_languages && data.programming_languages.length > 0) {
-              tooltipLines.push(`Languages: ${data.programming_languages.join(', ')}`);
-            }
-            
-            // Add UI availability if known
-            if (data.hasUI !== undefined) {
-              tooltipLines.push(`Has UI: ${data.hasUI ? 'Yes' : 'No'}`);
-            }
-            
-            // Add a shortened description
-            const shortDescription = data.description.length > 100 
-              ? data.description.substring(0, 100) + '...' 
-              : data.description;
-            tooltipLines.push(shortDescription);
-            
-            return tooltipLines;
           }
         }
       },
@@ -509,42 +490,22 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
       duration: 1000,
       easing: 'easeOutQuart'
     },
-    onClick: (event: any, elements: any, chart: any) => {
-      // Completely bypass Chart.js clustering by using direct position detection
-      if (chart && event?.native) {
-        // Get exact mouse position
-        const rect = chart.canvas.getBoundingClientRect();
-        const mouseX = event.native.clientX - rect.left;
-        const mouseY = event.native.clientY - rect.top;
-        
-        // Get all points and their exact positions
-        const dataset = chart.data.datasets[0];
-        const meta = chart.getDatasetMeta(0);
-        
-        // Find the EXACT point under cursor, no clustering or nearest-neighbor
-        for (let i = 0; i < meta.data.length; i++) {
-          const point = meta.data[i];
-          const pointX = point.x;
-          const pointY = point.y;
-          
-          // Check if mouse is inside the point's circle
-          const distance = Math.sqrt(Math.pow(mouseX - pointX, 2) + Math.pow(mouseY - pointY, 2));
-          
-          // Only open if mouse is DIRECTLY on this point
-          if (distance <= 34) { // Use 34 which is half of the 68px diameter
-            const dataPoint = dataset.data[i];
-            console.log("EXACT point clicked:", dataPoint.name, "distance:", distance);
-            
-            const framework = frameworksByName.current[dataPoint.name];
-            if (framework) {
-              setSelectedFramework(framework);
-              setDialogOpen(true);
-            }
-            
-            // Important: return after finding the direct hit to prevent multiple dialogs
-            return;
-          }
-        }
+    // Simple direct click handler - only opens the framework if clicked directly
+    onClick: (event: any, elements: any[], chart: any) => {
+      // If no elements are clicked, do nothing
+      if (!elements || elements.length === 0) return;
+      
+      // Get the element's data
+      const element = elements[0];
+      const datasetIndex = element.datasetIndex;
+      const index = element.index;
+      const dataPoint = chart.data.datasets[datasetIndex].data[index];
+      
+      // Find the framework 
+      const framework = findFramework(dataPoint.name);
+      if (framework) {
+        setSelectedFramework(framework);
+        setDialogOpen(true);
       }
     }
   };
@@ -555,6 +516,8 @@ export default function ScatterPlot({ frameworks }: ScatterPlotProps) {
     }
   };
 
+  // No custom handlers needed - using Chart.js built-in events
+  
   // Make sure both ChartJS and chart data are loaded
   if (!chartData) return <div>Loading...</div>;
   

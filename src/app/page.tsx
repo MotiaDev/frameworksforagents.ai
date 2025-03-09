@@ -32,17 +32,17 @@ export default function Home() {
   useEffect(() => {
     // Apply filters
     let filtered = [...frameworks];
-    
+
     // Apply search filter only
     if (searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(f => 
-        f.name.toLowerCase().includes(query) || 
+      filtered = filtered.filter(f =>
+        f.name.toLowerCase().includes(query) ||
         f.description.toLowerCase().includes(query) ||
         f.category.toLowerCase().includes(query)
       );
     }
-    
+
     setFilteredFrameworks(filtered);
   }, [frameworks, searchQuery]);
 
@@ -69,25 +69,25 @@ export default function Home() {
         <div className="container mx-auto flex flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold text-foreground shrink-0">AI Agent Landscape</h1>
-            
+
             {/* Built by Motia */}
             <div className="hidden sm:flex items-center gap-2 border-l border-border/50 pl-4">
               <span className="text-xs text-muted-foreground">Built by</span>
-              <a 
-                href="https://motia.dev" 
-                target="_blank" 
+              <a
+                href="https://motia.dev"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center hover:opacity-80 transition-opacity"
               >
-                <img 
-                  src="/motia-logo-white.png" 
-                  alt="Motia" 
-                  className="h-6" 
+                <img
+                  src="/motia-logo-white.png"
+                  alt="Motia"
+                  className="h-6"
                 />
               </a>
             </div>
           </div>
-          
+
           <div className="flex flex-row items-center gap-2">
             <div className="w-48 sm:w-64">
               <input
@@ -98,36 +98,29 @@ export default function Home() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
-            {/* Compact legend */}
-            <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground">
-              <span title="0 = No Code, 1 = Advanced">Code Level</span>
-              <span className="mx-1">|</span>
-              <span title="0 = Simple, 1 = Complex">Complexity</span>
-            </div>
           </div>
         </div>
       </div>
-      
+
       {/* Full-screen chart area - increased top padding to accommodate controls */}
       <div className="w-full h-screen pt-24">
         <ScatterPlot frameworks={filteredFrameworks} />
       </div>
-      
+
       {/* Mobile "Built by" footer */}
       <div className="sm:hidden fixed bottom-0 right-0 z-10 bg-card/80 backdrop-blur-sm p-2 rounded-tl-md shadow-md">
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] text-muted-foreground">Built by</span>
-          <a 
-            href="https://motia.dev" 
-            target="_blank" 
+          <a
+            href="https://motia.dev"
+            target="_blank"
             rel="noopener noreferrer"
             className="flex items-center hover:opacity-80 transition-opacity"
           >
-            <img 
-              src="/motia-icon-white.png" 
-              alt="Motia" 
-              className="h-5" 
+            <img
+              src="/motia-icon-white.png"
+              alt="Motia"
+              className="h-5"
             />
           </a>
         </div>
